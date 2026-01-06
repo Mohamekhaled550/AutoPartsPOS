@@ -1,0 +1,36 @@
+@model IEnumerable<AutoPartsPOS.Models.PurchaseInvoice>
+@{
+    ViewData["Title"] = "اختر فاتورة شراء";
+}
+
+<h3>اختر فاتورة الشراء</h3>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#رقم الفاتورة</th>
+            <th>تاريخ الفاتورة</th>
+            <th>إجمالي الفاتورة</th>
+            <th>المبلغ المدفوع</th>
+            <th>المتبقي</th>
+            <th>إجراء</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var invoice in Model)
+        {
+            <tr>
+                <td>@invoice.Id</td>
+                <td>@invoice.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                <td>@invoice.Total.ToString("N2")</td>
+                <td>@invoice.Paid.ToString("N2")</td>
+                <td>@(invoice.Total - invoice.Paid).ToString("N2")</td>
+                <td>
+                    <a href="/Returns/Purchase?invoiceId=@invoice.Id" class="btn btn-success btn-sm">
+                        إرجاع
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

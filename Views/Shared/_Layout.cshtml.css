@@ -1,0 +1,108 @@
+﻿/* الإعدادات الأساسية للسايدبار */
+#sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    right: 0;
+    top: 0;
+    background-color: #1e293b;
+    color: white;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    overflow-x: hidden;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+}
+
+#sidebar.collapsed {
+    width: 70px;
+}
+
+/* توحيد شكل جميع العناصر داخل القائمة */
+#sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* هذا التنسيق يطبق على اللينكات العادية وعلى رأس الدروب داون */
+#sidebar ul li, 
+#sidebar .dropdown-header {
+    padding: 15px 22px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    color: #cbd5e1;
+    font-size: 15px;
+}
+
+#sidebar ul li i, 
+#sidebar .dropdown-header i:first-child {
+    min-width: 30px;
+    font-size: 18px;
+}
+
+#sidebar ul li:hover, 
+#sidebar .dropdown-header:hover {
+    background-color: #334155;
+    color: white;
+}
+
+/* إخفاء النصوص عند التصغير */
+#sidebar.collapsed span, 
+#sidebar.collapsed .arrow,
+#sidebar.collapsed .brand-name {
+    display: none;
+}
+
+/* تنسيق الدروب داون (القائمة المنسدلة) */
+.sidebar-dropdown .dropdown-menu {
+    display: none; /* مخفية افتراضياً */
+    background-color: #0f172a;
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-dropdown.active .dropdown-menu {
+    display: block; /* تظهر عند إضافة كلاس active */
+}
+
+.sidebar-dropdown .dropdown-menu li {
+    padding: 12px 50px !important; /* إزاحة لليمين قليلاً */
+    font-size: 14px;
+    background-color: transparent;
+}
+
+.sidebar-dropdown .dropdown-menu li:hover {
+    background-color: #1e293b;
+}
+
+/* سهم الدروب داون */
+.arrow {
+    margin-right: auto; /* يدفع السهم لأقصى اليسار في RTL */
+    font-size: 12px;
+    transition: transform 0.3s;
+}
+
+/* المحتوى الرئيسي */
+#content {
+    margin-right: 260px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+#content.collapsed {
+    margin-right: 70px;
+}
+
+/* الهيدر العلوي */
+.navbar {
+    background: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 260px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}

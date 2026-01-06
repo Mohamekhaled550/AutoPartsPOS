@@ -1,0 +1,185 @@
+@model List<AutoPartsPOS.Models.SalesInvoice>
+
+
+<style>
+    /* حاوية الصفحة */
+    .collection-container {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        margin-top: 20px;
+    }
+
+    /* عنوان الصفحة */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 15px;
+    }
+
+    .page-header h2 {
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    /* تحسين الجدول */
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .custom-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 700;
+        padding: 15px;
+        border-bottom: 2px solid #e2e8f0;
+        text-align: right;
+    }
+
+    .custom-table tbody td {
+        padding: 15px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        color: #334155;
+        font-size: 0.95rem;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    /* تمييز الأرقام */
+    .amount-total { font-weight: 700; color: #1e293b; }
+    .amount-paid { font-weight: 700; color: #3b82f6; }
+    .amount-remaining { 
+        font-weight: 800; 
+        color: #ef4444; 
+        background: #fee2e2; 
+        padding: 4px 10px; 
+        border-radius: 8px; 
+    }
+
+    /* تنسيق فورم التحصيل داخل الجدول */
+    .collect-form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .collect-input {
+        width: 120px !important;
+        height: 38px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        padding: 0 10px;
+        font-weight: 700;
+    }
+
+    .btn-collect {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0 15px;
+        height: 38px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .btn-collect:hover {
+        background: #059669;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    }
+
+    /* التنبيهات */
+    .alert {
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: none;
+        font-weight: 600;
+    }
+</style>
+
+
+<div class="collection-container">
+    <div class="page-header">
+        <h2>تحصيل فواتير الآجل <i class="fas fa-file-invoice-dollar text-primary"></i></h2>
+        <span class="badge bg-primary">عدد الفواتير: @Model.Count</span>
+    </div>
+
+    @if(TempData["Error"] != null)
+    {
+        <div class="alert alert-danger shadow-sm">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        </div>
+    }
+    @if(TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>رقم الفاتورة</th>
+                    <th>العميل</th>
+                    <th>التاريخ</th>
+                    <th>الإجمالي</th>
+                    <th>المدفوع</th>
+                    <th>المتبقي</th>
+                    <th style="width: 250px;">إجراء التحصيل</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var invoice in Model)
+                {
+                    <tr>
+                        <td style="font-weight: bold;">#@invoice.Id</td>
+                        <td>
+                            <i class="fas fa-user-circle text-muted"></i> @invoice.Customer?.Name
+                        </td>
+                        <td class="text-muted">@invoice.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                        <td class="amount-total">@invoice.Total.ToString("N2")</td>
+                        <td class="amount-paid">@invoice.Paid.ToString("N2")</td>
+                        <td>
+                            <span class="amount-remaining">
+                                @((invoice.Total - invoice.Paid).ToString("N2"))
+                            </span>
+                        </td>
+                        <td>
+                            <form asp-action="Collect" method="post" class="collect-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="invoiceId" value="@invoice.Id" />
+                                
+                                <input type="number" name="amount" step="0.01" min="0.01" 
+                                       max="@(invoice.Total - invoice.Paid)" 
+                                       class="collect-input" 
+                                       placeholder="المبلغ" required />
+                                
+                                <button type="submit" class="btn-collect">
+                                    <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

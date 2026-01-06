@@ -1,0 +1,174 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - لوحة التحكم</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/site1.css" />
+</head>
+<body>
+   
+    <div class="navbar">
+        <div class="username">
+             <i class="fas fa-user-circle"></i> @HttpContextAccessor.HttpContext.Session.GetString("UserName")
+        </div>
+        
+        <form method="post" asp-controller="Account" asp-action="Logout">
+            
+            <button type="submit"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
+        </form>
+    </div>
+    
+
+    @{
+        var permissionsSession = HttpContextAccessor.HttpContext.Session.GetString("Permissions") ?? "";
+        var permissions = permissionsSession.Split(',', StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    <div class="sidebar collapsed" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-rocket logo-icon"></i>
+            <span class="brand-name">مشروعي الذكي</span>
+        </div>
+        <ul>
+            <li onclick="location.href='@Url.Action("Index","Home")'"><i class="fas fa-chart-line"></i><span>الرئيسية</span></li>
+
+            @if (permissions.Contains("Products_Read"))
+            {
+                <li onclick="location.href='@Url.Action("Index","Products")'"><i class="fas fa-boxes-stacked"></i><span>المنتجات</span></li>
+            }
+            @if (permissions.Contains("Customers_Read"))
+            {
+                <li onclick="location.href='@Url.Action("Index","Customers")'"><i class="fas fa-users"></i><span>العملاء</span></li>
+            }
+            @if (permissions.Contains("Suppliers_Read"))
+            {
+                <li onclick="location.href='@Url.Action("Index","Suppliers")'"><i class="fas fa-truck"></i><span>الموردين</span></li>
+            }
+            @if (permissions.Contains("SalesInvoices_Read"))
+            {
+                <li onclick="location.href='@Url.Action("Index","SalesInvoices")'"><i class="fas fa-file-invoice-dollar"></i><span>فواتير المبيعات</span></li>
+            }
+            @if (permissions.Contains("PurchaseInvoices_Read"))
+            {
+                <li onclick="location.href='@Url.Action("Index","PurchaseInvoices")'"><i class="fas fa-file-invoice"></i><span>فواتير المشتريات</span></li>
+            }
+            @if (permissions.Contains("Returns_Read"))
+            {
+                <li onclick="location.href='@Url.Action("Index","Returns")'"><i class="fas fa-undo"></i><span>المردودات</span></li>
+            }
+
+              @if (permissions.Contains("CashTransactions_Read"))
+           {
+    <li class="sidebar-dropdown">
+        <div class="dropdown-header">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>التقارير</span>
+            <i class="fas fa-chevron-down arrow"></i>
+        </div>
+        <ul class="dropdown-menu">
+            <li onclick="location.href='@Url.Action("StockReport","Reports")'">
+                <span>تقارير المخزون</span>
+            </li>
+            
+            @if (permissions.Contains("Reports_Collections"))
+            {
+                <li onclick="location.href='@Url.Action("CollectionsReport","Reports")'">
+                    <span>تقارير التحصيلات </span>
+                </li>
+            }
+
+             @if (permissions.Contains("Reports_Sales"))
+            {
+                <li onclick="location.href='@Url.Action("Sales","Reports")'">
+                    <span>تقارير المبيعات </span>
+                </li>
+            }
+        </ul>
+    </li>
+}
+
+
+
+            @if (permissions.Contains("CashTransactions_Read"))
+{
+    <li class="sidebar-dropdown">
+        <div class="dropdown-header">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>الحسابات النقدية</span>
+            <i class="fas fa-chevron-down arrow"></i>
+        </div>
+        <ul class="dropdown-menu">
+                        @if (permissions.Contains("Reports_Customers") && permissions.Contains("SalesInvoices_Read")){
+
+            <li onclick="location.href='@Url.Action("CustomerStatement","Reports")'">
+                <span>عرض الحسابات</span>
+            </li>
+            }
+            
+            @if (permissions.Contains("CashTransactions_Create") && permissions.Contains("SalesInvoices_Read"))
+            {
+                <li onclick="location.href='@Url.Action("Index","CreditCollections")'">
+                    <span>تحصيل فواتير الآجل</span>
+                </li>
+            }
+        </ul>
+    </li>
+}
+        </ul>
+    </div>
+
+    <div class="content collapsed" id="content">
+        @RenderBody()
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('content');
+
+        // Sidebar hover effect
+        sidebar.addEventListener('mouseenter', () => {
+            sidebar.classList.remove('collapsed');
+            content.classList.remove('collapsed');
+        });
+
+        sidebar.addEventListener('mouseleave', () => {
+            sidebar.classList.add('collapsed');
+            content.classList.add('collapsed');
+        });
+
+
+
+document.querySelectorAll('.sidebar-dropdown .dropdown-header').forEach(header => {
+    header.addEventListener('click', function(e) {
+        // منع أي أحداث أخرى
+        e.preventDefault();
+        
+        const parentLi = this.parentElement;
+        
+        // إغلاق أي قائمة أخرى مفتوحة (اختياري)
+        document.querySelectorAll('.sidebar-dropdown').forEach(item => {
+            if (item !== parentLi) {
+                item.classList.remove('active');
+            }
+        });
+
+        // فتح أو إغلاق الحالية
+        parentLi.classList.toggle('active');
+
+        // إذا كان السايدبار مصغر افتحه عشان يشوف الكلام
+        if (sidebar.classList.contains('collapsed')) {
+            sidebar.classList.remove('collapsed');
+            content.classList.remove('collapsed');
+        }
+    });
+});
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

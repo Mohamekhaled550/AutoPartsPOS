@@ -1,0 +1,346 @@
+/* استيراد خط Cairo الاحترافي */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+
+:root {
+    --main-bg: #f8f9fa;
+    --sidebar-bg: #1e293b; /* كحلي غامق عصري */
+    --accent-color: #3b82f6; /* أزرق براند */
+    --text-main: #334155;
+    --white: #ffffff;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--main-bg);
+    margin: 0;
+    direction: rtl; /* لضمان الاتجاه العربي */
+    color: var(--text-main);
+}
+
+/* ==================================== */
+/* 1. NAVBAR STYLES                     */
+/* ==================================== */
+.navbar {
+    height: 50px;
+    background-color: var(--white);
+    color: var(--text-main);
+    padding: 0 30px;
+    padding-right: 80px;
+    transition: padding-right 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+body:has(.sidebar:not(.collapsed)) .navbar {
+    padding-right: 270px;
+}
+
+.username {
+    background: #f1f5f9;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem !important;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.navbar button {
+    background: #ef4444;
+    border: none;
+    color: white;
+    padding: 4px 12px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-family: 'Cairo';
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.navbar button:hover { background: #dc2626; }
+
+/* ==================================== */
+/* 2. SIDEBAR STYLES (تم التعديل هنا)    */
+/* ==================================== */
+.sidebar {
+    width: 220px;
+    background: var(--sidebar-bg);
+    color: #cbd5e1;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    transition: width var(--transition);
+    overflow-x: hidden;
+    z-index: 1001;
+    box-shadow: -4px 0 10px rgba(0,0,0,0.1);
+    padding-top: 50px;
+}
+
+.sidebar.collapsed { width: 65px; }
+
+.sidebar ul { list-style: none; padding: 10px 0; margin: 0; }
+
+/* توحيد مقاس العناصر العادية ورؤوس الدروب داون */
+.sidebar li, .sidebar .dropdown-header {
+    white-space: nowrap;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: var(--transition);
+    border-right: 4px solid transparent;
+    padding: 12px 20px; /* المقاس الموحد */
+}
+
+/* إزالة البادينج الإضافي من الـ li الذي يحتوي على دروب داون */
+.sidebar li.sidebar-dropdown {
+    padding: 0; 
+    display: block; /* لضمان ترتيب العناصر داخله */
+}
+
+.sidebar li:hover:not(.sidebar-dropdown), 
+.sidebar .dropdown-header:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--white);
+    border-right-color: var(--accent-color);
+}
+
+.sidebar i {
+    margin-left: 15px;
+    font-size: 1.1rem;
+    min-width: 25px;
+    text-align: center;
+}
+
+.sidebar span {
+    font-size: 0.85rem;
+    transition: opacity 0.2s;
+}
+
+.sidebar.collapsed li span, 
+.sidebar.collapsed .arrow {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* القائمة المنسدلة - التحصيل والتحكم */
+.arrow {
+    margin-right: auto; /* دفع السهم لليسار في RTL */
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.dropdown-menu {
+    max-height: 0;
+    overflow: hidden;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: rgba(0,0,0,0.2); /* خلفية أغمق للتمييز */
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-dropdown.active .dropdown-menu {
+    max-height: 200px; /* ارتفاع كافٍ للعناصر الداخلية */
+}
+
+.sidebar-dropdown.active .arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu li {
+    padding: 10px 45px !important; /* إزاحة لليمين للتميز */
+    font-size: 0.8rem !important;
+    border-right: none !important;
+}
+
+.dropdown-menu li:hover {
+    background: rgba(255,255,255,0.03);
+    color: var(--white);
+}
+
+/* ==================================== */
+/* 3. CONTENT AREA                      */
+/* ==================================== */
+.content {
+    margin-right: 220px;
+    margin-top: 50px;
+    padding: 25px;
+    transition: margin-right var(--transition);
+}
+
+.content.collapsed { margin-right: 65px; }
+
+/* Dashboard Cards */
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+    border: none !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover { transform: translateY(-5px); }
+
+.card h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.card p {
+    margin: 10px 0 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--sidebar-bg);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: var(--accent-color);
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    background: rgba(0,0,0,0.2);
+    overflow: hidden;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.logo-icon {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    min-width: 30px;
+    margin-left: 15px;
+}
+
+.brand-name {
+    font-weight: 700;
+    color: white;
+    font-size: 1.1rem;
+    transition: opacity 0.3s;
+}
+
+/* ==================================== */
+/* 4. FORMS & INPUTS                    */
+/* ==================================== */
+.form-container {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    max-width: 600px;
+    margin: 30px auto;
+}
+
+.form-group { margin-bottom: 20px; }
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: none;
+}
+
+.btn-submit {
+    display: inline-block;
+    background: var(--accent-color);
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+
+.btn-submit:hover { background: #2563eb; }
+
+/* ==================================== */
+/* 5. TABLES                            */
+/* ==================================== */
+.data-table-container {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: right;
+    font-size: 0.95rem;
+}
+
+.data-table th, .data-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.data-table thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.data-table tbody tr:nth-child(even) { background-color: #fcfdfe; }
+.data-table tbody tr:hover { background-color: #eff6ff; cursor: pointer; }
+
+.btn-create-new {
+    display: inline-block;
+    background: #10b981;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: background 0.3s;
+}

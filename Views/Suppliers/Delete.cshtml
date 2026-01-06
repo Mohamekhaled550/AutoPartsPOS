@@ -1,0 +1,16 @@
+@model AutoPartsPOS.Models.Supplier
+
+<h2>تأكيد حذف المورد</h2>
+
+<div class="form-container">
+    <p>هل أنت متأكد من حذف المورد <strong>@Model.Name</strong>؟</p>
+
+    <form asp-action="Delete">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn-submit" style="background:#ef4444;">
+            حذف
+        </button>
+        <a asp-action="Index" class="btn-create-new">إلغاء</a>
+    </form>
+</div>

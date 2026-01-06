@@ -1,0 +1,51 @@
+@model AutoPartsPOS.Models.Product
+
+<h2 style="font-weight: 700; margin-bottom: 25px;">إضافة منتج جديد</h2>
+
+<div class="form-container">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        
+        <div asp-validation-summary="ModelOnly" class="validation-message" style="color: red; margin-bottom: 15px;"></div>
+        
+        <div class="form-group">
+            <label>اسم المنتج</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label>نوع المنتج</label>
+            <select asp-for="Type" class="form-control">
+                <option value="">-- اختر النوع --</option>
+                <option value="Original">أصلي</option>
+                <option value="Commercial">تجاري</option>
+                <option value="Chinese">صيني</option>
+            </select>
+            <span asp-validation-for="Type" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label>سعر الشراء</label>
+            <input asp-for="BuyPrice" class="form-control" type="number" step="0.01" />
+            <span asp-validation-for="BuyPrice" class="validation-message"></span> </div>
+
+        <div class="form-group">
+            <label>سعر البيع</label>
+            <input asp-for="SellPrice" class="form-control" type="number" step="0.01" />
+            <span asp-validation-for="SellPrice" class="validation-message"></span> </div>
+
+        <div class="form-group">
+            <label>الكمية</label>
+            <input asp-for="Quantity" class="form-control" type="number" />
+            <span asp-validation-for="Quantity" class="validation-message"></span> </div>
+
+        <button type="submit" class="btn-submit">
+            <i class="fas fa-save"></i> حفظ المنتج
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

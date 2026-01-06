@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "لوحة التحكم الرئيسية";
+}
+
+<h2 style="margin-bottom: 25px; font-weight: 700;">نظرة عامة على النظام</h2>
+
+<div class="card-container">
+    <div class="card" style="border-right: 5px solid #10b981 !important;">
+        <h3>إجمالي المنتجات</h3>
+        <p>@ViewBag.TotalProducts</p>
+    </div>
+
+    <div class="card" style="border-right: 5px solid #3b82f6 !important;">
+        <h3>إجمالي العملاء</h3>
+        <p>@ViewBag.TotalCustomers</p>
+    </div>
+
+    <div class="card" style="border-right: 5px solid #f59e0b !important;">
+        <h3>إجمالي الموردين</h3>
+        <p>@ViewBag.TotalSuppliers</p>
+    </div>
+
+    <div class="card" style="border-right: 5px solid #ef4444 !important;">
+        <h3>المبيعات اليوم</h3>
+        <p>@ViewBag.TotalSalesToday</p>
+    </div>
+</div>

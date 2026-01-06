@@ -1,0 +1,245 @@
+@model AutoPartsPOS.Models.Reports.SalesReportVM
+
+<style>
+    /* الإعدادات العامة للتقرير */
+    .report-container {
+        background-color: #f4f7f6;
+        padding: 20px;
+        border-radius: 15px;
+        direction: rtl;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* تحسين العنوان */
+    .report-header {
+        color: #2c3e50;
+        font-weight: 800;
+        border-right: 5px solid #3498db;
+        padding-right: 15px;
+        margin-bottom: 25px;
+    }
+
+    /* فلتر البحث */
+    .filter-card {
+        background: white;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #dcdde1;
+        padding: 10px;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    .btn-search {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: transform 0.2s;
+    }
+
+    .btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+    }
+
+    /* كروت الإحصائيات (Stat Cards) */
+    .stat-card {
+        border: none;
+        border-radius: 15px;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        color: white;
+        padding: 20px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .stat-card:hover {
+        transform: scale(1.03);
+    }
+
+    /* ألوان الكروت */
+    .card-invoices { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
+    .card-total { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+    .card-cash { background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); }
+    .card-credit { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
+
+    .stat-card strong {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .stat-card h4 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .stat-icon {
+        position: absolute;
+        left: -10px;
+        bottom: -10px;
+        font-size: 4rem;
+        opacity: 0.2;
+    }
+
+    /* الجدول الاحترافي */
+    .table-wrapper {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .custom-table {
+        border: none;
+        margin-bottom: 0;
+    }
+
+    .custom-table thead th {
+        background-color: #f8fafc;
+        color: #64748b;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: none;
+        padding: 15px;
+    }
+
+    .custom-table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        color: #1e293b;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .badge-type {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .badge-cash { background-color: #dcfce7; color: #166534; }
+    .badge-credit { background-color: #fee2e2; color: #991b1b; }
+
+</style>
+
+<div class="report-container">
+    <h2 class="report-header">تقرير المبيعات الشامل <i class="fas fa-chart-line text-primary"></i></h2>
+
+    <div class="filter-card">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">من تاريخ</label>
+                <input type="date" name="fromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">إلى تاريخ</label>
+                <input type="date" name="toDate" value="@Model.ToDate.ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">نوع البيع</label>
+                <select name="isCredit" class="form-select">
+                    <option value="">جميع الأنواع</option>
+                    <option value="false" selected="@(Model.IsCredit == false)">نقدي فقط</option>
+                    <option value="true" selected="@(Model.IsCredit == true)">آجل فقط</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-search w-100">
+                    <i class="fas fa-filter"></i> عرض التقرير المحدث
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card card-invoices">
+                <strong>عدد الفواتير</strong>
+                <h4>@Model.TotalInvoices</h4>
+                <i class="fas fa-file-invoice stat-icon"></i>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="stat-card card-total">
+                <strong>إجمالي المبيعات</strong>
+                <h4>@Model.TotalSales.ToString("N0") <small style="font-size: 1rem;">ج.م</small></h4>
+                <i class="fas fa-money-bill-wave stat-icon"></i>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="stat-card card-cash">
+                <strong>مبيعات نقدي</strong>
+                <h4>@Model.CashSales.ToString("N0") <small style="font-size: 1rem;">ج.م</small></h4>
+                <i class="fas fa-wallet stat-icon"></i>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="stat-card card-credit">
+                <strong>مبيعات آجل</strong>
+                <h4>@Model.CreditSales.ToString("N0") <small style="font-size: 1rem;">ج.م</small></h4>
+                <i class="fas fa-credit-card stat-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <h5 class="mb-3 fw-bold"><i class="fas fa-list-ul"></i> تفاصيل الفواتير</h5>
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>رقم الفاتورة</th>
+                        <th>تاريخ العملية</th>
+                        <th>اسم العميل</th>
+                        <th>طريقة الدفع</th>
+                        <th class="text-end">القيمة الإجمالية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var inv in Model.Invoices)
+                    {
+                        <tr>
+                            <td class="fw-bold">#@inv.InvoiceId</td>
+                            <td><i class="far fa-calendar-alt text-muted"></i> @inv.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                            <td><i class="far fa-user text-muted"></i> @inv.CustomerName</td>
+                            <td>
+                                <span class="badge-type @(inv.IsCredit ? "badge-credit" : "badge-cash")">
+                                    <i class="fas @(inv.IsCredit ? "fa-clock" : "fa-check-circle")"></i> 
+                                    @(inv.IsCredit ? "آجل" : "نقدي")
+                                </span>
+                            </td>
+                            <td class="text-end fw-bold text-primary">@inv.Total.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
