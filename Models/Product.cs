@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
-
+using AutoPartsPOS.Models.Maintenances;
 namespace AutoPartsPOS.Models
 {
     public class Product
@@ -29,6 +29,7 @@ namespace AutoPartsPOS.Models
 
         // Navigation Properties
         public ICollection<SalesInvoiceItem> ?SalesInvoiceItems { get; set; }
-        public ICollection<PurchaseInvoiceItem>? PurchaseInvoiceItems { get; set; }
+         public ICollection<MaintenanceItem> ? MaintenanceItems { get; set; }
+
     }
 }

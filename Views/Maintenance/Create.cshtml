@@ -1,0 +1,286 @@
+@model AutoPartsPOS.Models.Maintenances.Maintenance
+
+@{
+    ViewData["Title"] = "إضافة عملية صيانة جديدة";
+}
+
+<div class="container mt-4">
+    <h2 class="text-right">🛠 إضافة عملية صيانة</h2>
+    <hr />
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show text-right" role="alert">
+        <strong>خطأ في العملية:</strong> @TempData["Error"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show text-right" role="alert">
+        @TempData["Success"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+
+    <form id="maintenanceForm" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">البيانات الأساسية</div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>اسم العملية</label>
+                            <input asp-for="Name" class="form-control" placeholder="مثلاً: صيانة دورية لسيارة تويوتا" required />
+                        </div>
+                        <div class="form-group">
+                            <label>نوع الصيانة</label>
+                            <select asp-for="Type" class="form-control" asp-items="Html.GetEnumSelectList<AutoPartsPOS.Models.Maintenances.MaintenanceType>()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>العميل</label>
+                            <select asp-for="CustomerId" class="form-control select2" required>
+                                <option value="">-- اختر عميل --</option>
+                                @foreach (var c in ViewBag.Customers) {
+                                    <option value="@c.Id">@c.Name (رصيده: @c.Balance)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الفني المسؤول</label>
+                            <select asp-for="TechnicianId" class="form-control" required>
+                                <option value="">-- اختر فني --</option>
+                                @foreach (var u in ViewBag.Technicians) {
+                                    <option value="@u.Id">@u.FullName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>سعر المصنعية (اليد)</label>
+                            <input asp-for="ServicePrice" id="servicePrice" type="number" step="0.01" class="form-control total-trigger" value="0" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">قطع الغيار المستهلكة</div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <select id="productSelect" class="form-control select2">
+                                    <option value="">-- اختر قطعة غيار من المخزن --</option>
+                                    @foreach (var p in ViewBag.Products) {
+                                        <option value="@p.Id" data-price="@p.SellPrice" data-stock="@p.Quantity">@p.Name (المتاح: @p.Quantity)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" id="productQty" class="form-control" value="1" min="1" />
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" id="btnAddProduct" class="btn btn-success btn-block">إضافة للجدول</button>
+                            </div>
+                        </div>
+
+<div class="card shadow-sm mb-4 border-warning">
+    <div class="card-header bg-warning text-dark font-weight-bold">⚠️ أصناف محتجزة تحت الإصلاح (أمانات)</div>
+    <div class="card-body">
+        <div class="row mb-2">
+            <div class="col-md-9">
+                <input type="text" id="holdItemName" class="form-control" placeholder="مثلاً: مفتاح السيارة، إطار قديم، بطارية..." />
+            </div>
+            <div class="col-md-3">
+                <button type="button" id="btnAddHoldItem" class="btn btn-warning btn-block font-weight-bold">إضافة أمانة</button>
+            </div>
+        </div>
+        <ul id="holdItemsList" class="list-group list-group-flush">
+            </ul>
+        <input type="hidden" name="holdItemsJson" id="holdItemsJson" />
+    </div>
+</div>
+
+                        <table class="table table-bordered" id="itemsTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th>السعر</th>
+                                    <th>الكمية</th>
+                                    <th>الإجمالي</th>
+                                    <th>حذف</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-left">إجمالي قطع الغيار:</th>
+                                    <th id="partsTotal">0.00</th>
+                                    <th></th>
+                                </tr>
+                                <tr class="bg-dark text-white">
+                                    <th colspan="3" class="text-left">إجمالي الفاتورة النهائي:</th>
+                                    <th id="finalTotal">0.00</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                
+                <input type="hidden" name="itemsJson" id="itemsJson" />
+                <button type="submit" class="btn btn-primary btn-lg float-left">حفظ وإصدار الفاتورة</button>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // استخدام jQuery.noConflict لضمان عدم وجود تداخل
+        var $j = jQuery.noConflict();
+
+        $j(document).ready(function () {
+            console.log("السكربت اشتغل تمام"); // افتح F12 وشوف الكلمة دي ظهرت ولا لا
+
+            let selectedItems = [];
+
+            // 1. إضافة منتج للجدول
+            $j('#btnAddProduct').click(function (e) {
+                e.preventDefault();
+
+                let pId = $j('#productSelect').val();
+                let pSelect = $j('#productSelect option:selected');
+                let pName = pSelect.text();
+                let pPrice = parseFloat(pSelect.attr('data-price')) || 0;
+                let pStock = parseInt(pSelect.attr('data-stock')) || 0;
+                let qty = parseInt($j('#productQty').val()) || 0;
+
+                console.log("بيانات المنتج المختار:", { pId, pPrice, pStock, qty });
+
+                if (!pId || qty <= 0) {
+                    alert("رجاءً اختر منتج وكمية صحيحة");
+                    return;
+                }
+
+                if (qty > pStock) {
+                    alert("الكمية المطلوبة أكبر من المتاح بالمخزن! المتاح: " + pStock);
+                    return;
+                }
+
+                // إضافة للمصفوفة
+                selectedItems.push({ 
+                    ProductId: parseInt(pId), 
+                    Name: pName, 
+                    Price: pPrice, 
+                    Quantity: qty 
+                });
+
+                renderTable();
+            });
+
+            // 2. رسم الجدول
+            function renderTable() {
+                let html = '';
+                let partsTotal = 0;
+
+                $j.each(selectedItems, function(index, item) {
+                    let rowTotal = item.Price * item.Quantity;
+                    partsTotal += rowTotal;
+                    html += `<tr>
+                                <td class="text-right">${item.Name}</td>
+                                <td>${item.Price.toFixed(2)}</td>
+                                <td>${item.Quantity}</td>
+                                <td>${rowTotal.toFixed(2)}</td>
+                                <td><button type="button" class="btn btn-danger btn-sm btn-remove" data-index="${index}">حذف</button></td>
+                             </tr>`;
+                });
+
+                $j('#itemsTable tbody').html(html);
+                $j('#partsTotal').text(partsTotal.toFixed(2));
+                
+                // تحديث الحقل المخفي
+                $j('#itemsJson').val(JSON.stringify(selectedItems));
+                
+                calculateFinalTotal();
+            }
+
+            // 3. حذف عنصر
+            $j(document).on('click', '.btn-remove', function() {
+                let index = $j(this).data('index');
+                selectedItems.splice(index, 1);
+                renderTable();
+            });
+
+            // 4. حساب الإجمالي النهائي
+            function calculateFinalTotal() {
+                let partsTotal = parseFloat($j('#partsTotal').text()) || 0;
+                let servicePrice = parseFloat($j('#servicePrice').val()) || 0;
+                let final = partsTotal + servicePrice;
+                $j('#finalTotal').text(final.toFixed(2));
+            }
+
+            $j('#servicePrice').on('input', function() {
+                calculateFinalTotal();
+            });
+        });
+
+        // مصفوفة للأصناف المحتجزة الجديدة
+let holdItems = [];
+
+// إضافة أمانة للستة
+$('#btnAddHoldItem').click(function() {
+    let itemName = $('#holdItemName').val();
+    if(!itemName) return;
+    holdItems.push(itemName);
+    renderHoldList();
+    $('#holdItemName').val('');
+});
+
+function renderHoldList() {
+    let html = '';
+    holdItems.forEach((item, index) => {
+        html += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${item}
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeHoldItem(${index})">×</button>
+                 </li>`;
+    });
+    $('#holdItemsList').html(html);
+    $('#holdItemsJson').val(JSON.stringify(holdItems));
+}
+
+function removeHoldItem(index) {
+    holdItems.splice(index, 1);
+    renderHoldList();
+}
+
+// --- التنبيه التلقائي عند اختيار العميل ---
+$('#CustomerId').change(function() {
+    let customerId = $(this).val();
+    if(!customerId) return;
+
+    // طلب Ajax للتأكد من وجود أمانات قديمة
+    $.get('/Maintenance/GetCustomerHoldItems?customerId=' + customerId, function(data) {
+        if(data && data.length > 0) {
+            let itemsStr = data.join(' - ');
+            Swal.fire({ // استخدم SweetAlert2 لو عندك أو alert عادية
+                title: '⚠️ تنبيه: العميل لديه أمانات!',
+                text: 'الأصناف المحتجزة سابقاً: ' + itemsStr,
+                icon: 'warning',
+                confirmButtonText: 'تمام'
+            });
+        }
+    });
+});
+    </script>
+
+    
+}

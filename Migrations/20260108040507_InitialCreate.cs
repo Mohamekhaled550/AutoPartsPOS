@@ -68,21 +68,6 @@ namespace AutoPartsPOS.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Suppliers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Suppliers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -123,28 +108,6 @@ namespace AutoPartsPOS.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PurchaseInvoices",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SupplierId = table.Column<int>(type: "int", nullable: false),
-                    InvoiceDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Paid = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PurchaseInvoices", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PurchaseInvoices_Suppliers_SupplierId",
-                        column: x => x.SupplierId,
-                        principalTable: "Suppliers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "SalesInvoices",
                 columns: table => new
                 {
@@ -165,13 +128,13 @@ namespace AutoPartsPOS.Migrations
                         column: x => x.CustomerId,
                         principalTable: "Customers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_SalesInvoices_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -194,34 +157,6 @@ namespace AutoPartsPOS.Migrations
                         name: "FK_UserRoles_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PurchaseInvoiceItems",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    InvoiceId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PurchaseInvoiceItems", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PurchaseInvoiceItems_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PurchaseInvoiceItems_PurchaseInvoices_InvoiceId",
-                        column: x => x.InvoiceId,
-                        principalTable: "PurchaseInvoices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -262,13 +197,53 @@ namespace AutoPartsPOS.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Maintenances",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
+                    TechnicianId = table.Column<int>(type: "int", nullable: false),
+                    ServicePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SalesInvoiceId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Maintenances", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Maintenances_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Maintenances_SalesInvoices_SalesInvoiceId",
+                        column: x => x.SalesInvoiceId,
+                        principalTable: "SalesInvoices",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Maintenances_Users_TechnicianId",
+                        column: x => x.TechnicianId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Returns",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ReturnType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    InvoiceId = table.Column<int>(type: "int", nullable: true),
+                    ReturnType = table.Column<int>(type: "int", nullable: false),
+                    SalesInvoiceId = table.Column<int>(type: "int", nullable: false),
+                    CustomerId = table.Column<int>(type: "int", nullable: true),
                     ReturnDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Total = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
@@ -276,14 +251,13 @@ namespace AutoPartsPOS.Migrations
                 {
                     table.PrimaryKey("PK_Returns", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Returns_PurchaseInvoices_InvoiceId",
-                        column: x => x.InvoiceId,
-                        principalTable: "PurchaseInvoices",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        name: "FK_Returns_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Returns_SalesInvoices_InvoiceId",
-                        column: x => x.InvoiceId,
+                        name: "FK_Returns_SalesInvoices_SalesInvoiceId",
+                        column: x => x.SalesInvoiceId,
                         principalTable: "SalesInvoices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -297,6 +271,7 @@ namespace AutoPartsPOS.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     InvoiceId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
@@ -308,11 +283,92 @@ namespace AutoPartsPOS.Migrations
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_SalesInvoiceItems_SalesInvoices_InvoiceId",
                         column: x => x.InvoiceId,
                         principalTable: "SalesInvoices",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MaintenanceHoldItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MaintenanceId = table.Column<int>(type: "int", nullable: false),
+                    ItemName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ReceivedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDelivered = table.Column<bool>(type: "bit", nullable: false),
+                    DeliveredAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MaintenanceHoldItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MaintenanceHoldItems_Maintenances_MaintenanceId",
+                        column: x => x.MaintenanceId,
+                        principalTable: "Maintenances",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MaintenanceItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MaintenanceId = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    IsService = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MaintenanceItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MaintenanceItems_Maintenances_MaintenanceId",
+                        column: x => x.MaintenanceId,
+                        principalTable: "Maintenances",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MaintenanceItems_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReturnItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReturnId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReturnItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReturnItems_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ReturnItems_Returns_ReturnId",
+                        column: x => x.ReturnId,
+                        principalTable: "Returns",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -333,24 +389,56 @@ namespace AutoPartsPOS.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PurchaseInvoiceItems_InvoiceId",
-                table: "PurchaseInvoiceItems",
-                column: "InvoiceId");
+                name: "IX_MaintenanceHoldItems_MaintenanceId",
+                table: "MaintenanceHoldItems",
+                column: "MaintenanceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PurchaseInvoiceItems_ProductId",
-                table: "PurchaseInvoiceItems",
+                name: "IX_MaintenanceItems_MaintenanceId",
+                table: "MaintenanceItems",
+                column: "MaintenanceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MaintenanceItems_ProductId",
+                table: "MaintenanceItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PurchaseInvoices_SupplierId",
-                table: "PurchaseInvoices",
-                column: "SupplierId");
+                name: "IX_Maintenances_CustomerId",
+                table: "Maintenances",
+                column: "CustomerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Returns_InvoiceId",
+                name: "IX_Maintenances_SalesInvoiceId",
+                table: "Maintenances",
+                column: "SalesInvoiceId",
+                unique: true,
+                filter: "[SalesInvoiceId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Maintenances_TechnicianId",
+                table: "Maintenances",
+                column: "TechnicianId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReturnItems_ProductId",
+                table: "ReturnItems",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReturnItems_ReturnId",
+                table: "ReturnItems",
+                column: "ReturnId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Returns_CustomerId",
                 table: "Returns",
-                column: "InvoiceId");
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Returns_SalesInvoiceId",
+                table: "Returns",
+                column: "SalesInvoiceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_PermissionId",
@@ -389,10 +477,13 @@ namespace AutoPartsPOS.Migrations
                 name: "CashTransactions");
 
             migrationBuilder.DropTable(
-                name: "PurchaseInvoiceItems");
+                name: "MaintenanceHoldItems");
 
             migrationBuilder.DropTable(
-                name: "Returns");
+                name: "MaintenanceItems");
+
+            migrationBuilder.DropTable(
+                name: "ReturnItems");
 
             migrationBuilder.DropTable(
                 name: "RolePermissions");
@@ -404,7 +495,10 @@ namespace AutoPartsPOS.Migrations
                 name: "UserRoles");
 
             migrationBuilder.DropTable(
-                name: "PurchaseInvoices");
+                name: "Maintenances");
+
+            migrationBuilder.DropTable(
+                name: "Returns");
 
             migrationBuilder.DropTable(
                 name: "Permissions");
@@ -413,13 +507,10 @@ namespace AutoPartsPOS.Migrations
                 name: "Products");
 
             migrationBuilder.DropTable(
-                name: "SalesInvoices");
-
-            migrationBuilder.DropTable(
                 name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "Suppliers");
+                name: "SalesInvoices");
 
             migrationBuilder.DropTable(
                 name: "Customers");

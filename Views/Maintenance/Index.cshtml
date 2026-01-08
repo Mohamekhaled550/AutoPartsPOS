@@ -1,0 +1,49 @@
+@model IEnumerable<AutoPartsPOS.Models.Maintenances.Maintenance>
+@{
+    ViewData["Title"] = "عمليات الصيانة";
+}
+
+<h2>عمليات الصيانة</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>رقم العملية</th>
+            <th>اسم العملية</th>
+            <th>العميل</th>
+            <th>الفني</th>
+            <th>الحالة</th>
+            <th>فاتورة</th>
+            <th>تاريخ الإنشاء</th>
+            <th>إجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var m in Model)
+    {
+        <tr>
+            <td>@m.Id</td>
+            <td>@m.Name</td>
+            <td>@m.Customer.Name</td>
+            <td>@m.Technician.FullName</td>
+            <td>@m.Status</td>
+            <td>
+                @if(m.SalesInvoice != null)
+                {
+                    <span>فاتورة #@m.SalesInvoice.Id</span>
+                }
+                else
+                {
+                    <span>-</span>
+                }
+            </td>
+            <td>@m.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>
+                <a class="btn btn-sm btn-primary" href="@Url.Action("Details", new { id = m.Id })">عرض</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a class="btn btn-success" href="@Url.Action("Create")">إنشاء عملية جديدة</a>

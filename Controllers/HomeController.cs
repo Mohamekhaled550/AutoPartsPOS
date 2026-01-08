@@ -25,13 +25,10 @@ namespace AutoPartsPOS.Controllers
             // Cards
             ViewBag.TotalProducts = _context.Products.Count();
             ViewBag.TotalCustomers = _context.Customers.Count();
-            ViewBag.TotalSuppliers = _context.Suppliers.Count();
             ViewBag.TotalSalesToday = _context.SalesInvoices
                                         .Where(s => s.InvoiceDate.Date == System.DateTime.Today)
                                         .Sum(s => (decimal?)s.Total) ?? 0;
-            ViewBag.TotalPurchasesToday = _context.PurchaseInvoices
-                                        .Where(p => p.InvoiceDate.Date == System.DateTime.Today)
-                                        .Sum(p => (decimal?)p.Total) ?? 0;
+       
 
            ViewBag.RecentSales = _context.SalesInvoices
     .Include(s => s.Customer)
@@ -48,13 +45,7 @@ namespace AutoPartsPOS.Controllers
     .ToList();
 
 
-            // آخر 5 فواتير مشتريات
-            ViewBag.RecentPurchases = _context.PurchaseInvoices
-                                        .Include(p => p.Supplier)
-                                        .OrderByDescending(p => p.InvoiceDate)
-                                        .Take(5)
-                                        .ToList();
-
+         
             return View();
         }
     }

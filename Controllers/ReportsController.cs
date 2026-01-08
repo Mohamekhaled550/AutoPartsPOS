@@ -132,7 +132,7 @@ public async Task<IActionResult> Sales(DateTime? fromDate, DateTime? toDate, boo
 public IActionResult CustomerStatement()
 {
     ViewBag.Customers = _context.Customers
-        .Where(c => c.Id != 1004)
+        .Where(c => c.Name != "عميل نقدي")
         .OrderBy(c => c.Name)
         .ToList();
 

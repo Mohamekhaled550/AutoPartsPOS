@@ -54,7 +54,7 @@ namespace AutoPartsPOS.Controllers
 
                 var invoice = new SalesInvoice
                 {
-                    CustomerId = IsCredit ? CustomerId : 1004,
+                    CustomerId = IsCredit ? CustomerId : 1,
                     InvoiceDate = DateTime.Now,
                     IsCredit = IsCredit,
                     Total = 0,
@@ -99,7 +99,7 @@ namespace AutoPartsPOS.Controllers
                         Amount = invoice.Total,
                         TransType = "In",
                         Notes = $"فاتورة بيع رقم {invoice.Id}",
-                        CustomerId =1004,
+                        CustomerId =1,
                         SalesInvoiceId = invoice.Id,
                         UserId = userId.Value
                     });
@@ -136,7 +136,7 @@ namespace AutoPartsPOS.Controllers
 
             ViewBag.Customers = _context.Customers
                 .OrderBy(c => c.Name)
-                .Where(c => c.Id != 1004) // استبعاد العميل الافتراضي
+                .Where(c => c.Name != "عميل نقدي")
                 .ToList();
 
             return View("Pos");

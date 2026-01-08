@@ -1,0 +1,121 @@
+@model AutoPartsPOS.Models.Maintenances.Maintenance
+
+@{
+    ViewData["Title"] = "تفاصيل عملية الصيانة";
+    var totalParts = Model.Items.Where(i => !i.IsService).Sum(i => i.Price * i.Quantity);
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-print-none mb-3 text-left">
+        <button onclick="window.print()" class="btn btn-dark">
+            <i class="fa fa-print"></i> طباعة الفاتورة
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">العودة للقائمة</a>
+    </div>
+
+    <div class="card shadow border-0" id="invoice-card">
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-6 text-right">
+                    <h2 class="text-primary">ورشة قطع الغيار والصيانة</h2>
+                    <p>عنوان الورشة: القاهرة، مصر<br>هاتف: 0123456789</p>
+                </div>
+                <div class="col-6 text-left">
+                    <h4 class="font-weight-bold">فاتورة صيانة رقم: #@Model.Id</h4>
+                    <p>التاريخ: @Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")</p>
+                    <span class="badge badge-success">الحالة: @Model.Status</span>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row mb-4 text-right">
+                <div class="col-6">
+                    <h6 class="text-muted">العميل:</h6>
+                    <h5 class="font-weight-bold">@Model.Customer?.Name</h5>
+                    <p>رقم العميل: @Model.Customer?.Phone</p>
+                </div>
+                <div class="col-6 text-left">
+                    <h6 class="text-muted">الفني المسؤول:</h6>
+                    <h5 class="font-weight-bold">@Model.Technician?.FullName</h5>
+                </div>
+            </div>
+
+            <h5 class="text-right font-weight-bold mb-3">تفاصيل الخدمات وقطع الغيار:</h5>
+            <table class="table table-bordered text-center">
+                <thead class="bg-light">
+                    <tr>
+                        <th>#</th>
+                        <th class="text-right">الوصف / الصنف</th>
+                        <th>السعر</th>
+                        <th>الكمية</th>
+                        <th>الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int count = 1; }
+                    
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@(count++)</td>
+                            <td class="text-right">@item.Description</td>
+                            <td>@item.Price.ToString("N2")</td>
+                            <td>@item.Quantity</td>
+                            <td>@((item.Price * item.Quantity).ToString("N2"))</td>
+                        </tr>
+                    }
+                    
+                    @if (Model.ServicePrice > 0)
+                    {
+                        <tr class="font-italic bg-light">
+                            <td>@count</td>
+                            <td class="text-right">مصنعية (أجور يد) - @Model.Name</td>
+                            <td>@Model.ServicePrice.ToString("N2")</td>
+                            <td>1</td>
+                            <td>@Model.ServicePrice.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="row mt-4">
+                <div class="col-md-7 text-right">
+                    <p class="font-weight-bold">ملاحظات الصيانة:</p>
+                    <div class="p-2 border rounded bg-light" style="min-height: 80px;">
+                        @(string.IsNullOrEmpty(Model.Notes) ? "لا توجد ملاحظات إضافية" : Model.Notes)
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <table class="table table-sm border-0">
+                        <tr>
+                            <th class="text-right border-0">إجمالي قطع الغيار:</th>
+                            <td class="text-left border-0">@totalParts.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right border-0">المصنعية:</th>
+                            <td class="text-left border-0">@Model.ServicePrice.ToString("N2")</td>
+                        </tr>
+                        <tr class="h4 font-weight-bold bg-primary text-white">
+                            <th class="text-right border-0">الإجمالي النهائي:</th>
+                            <td class="text-left border-0">@((totalParts + Model.ServicePrice).ToString("N2"))</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center bg-white border-top-0 d-none d-print-block">
+            <p class="text-muted">شكراً لثقتكم بنا - تم إصدار هذه الفاتورة إلكترونياً</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        body { background: white !important; }
+        .navbar, .btn, .d-print-none { display: none !important; }
+        .container { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+        .card { border: none !important; box-shadow: none !important; }
+        .bg-primary { background-color: #007bff !important; -webkit-print-color-adjust: exact; }
+    }
+</style>

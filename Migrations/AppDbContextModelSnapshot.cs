@@ -88,6 +88,124 @@ namespace AutoPartsPOS.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("AutoPartsPOS.Models.Maintenances.Maintenance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SalesInvoiceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ServicePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TechnicianId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("SalesInvoiceId")
+                        .IsUnique()
+                        .HasFilter("[SalesInvoiceId] IS NOT NULL");
+
+                    b.HasIndex("TechnicianId");
+
+                    b.ToTable("Maintenances");
+                });
+
+            modelBuilder.Entity("AutoPartsPOS.Models.Maintenances.MaintenanceHoldItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime?>("DeliveredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDelivered")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MaintenanceId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaintenanceId");
+
+                    b.ToTable("MaintenanceHoldItems");
+                });
+
+            modelBuilder.Entity("AutoPartsPOS.Models.Maintenances.MaintenanceItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsService")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MaintenanceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("ProductId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaintenanceId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("MaintenanceItems");
+                });
+
             modelBuilder.Entity("AutoPartsPOS.Models.Permission", b =>
                 {
                     b.Property<int>("Id")
@@ -136,63 +254,6 @@ namespace AutoPartsPOS.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("AutoPartsPOS.Models.PurchaseInvoice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("InvoiceDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Paid")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("SupplierId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SupplierId");
-
-                    b.ToTable("PurchaseInvoices");
-                });
-
-            modelBuilder.Entity("AutoPartsPOS.Models.PurchaseInvoiceItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("InvoiceId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InvoiceId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("PurchaseInvoiceItems");
-                });
-
             modelBuilder.Entity("AutoPartsPOS.Models.Return", b =>
                 {
                     b.Property<int>("Id")
@@ -202,10 +263,6 @@ namespace AutoPartsPOS.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PurchaseInvoiceId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ReturnDate")
@@ -218,9 +275,6 @@ namespace AutoPartsPOS.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<int?>("SupplierId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
@@ -228,15 +282,9 @@ namespace AutoPartsPOS.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("PurchaseInvoiceId");
-
                     b.HasIndex("SalesInvoiceId");
 
-                    b.HasIndex("SupplierId");
-
                     b.ToTable("Returns");
-
-                    b.HasCheckConstraint("CK_Return_InvoiceType", "(ReturnType = 1 AND SalesInvoiceId IS NOT NULL AND PurchaseInvoiceId IS NULL)\r\n       OR (ReturnType = 2 AND PurchaseInvoiceId IS NOT NULL AND SalesInvoiceId IS NULL)");
                 });
 
             modelBuilder.Entity("AutoPartsPOS.Models.ReturnItem", b =>
@@ -344,13 +392,18 @@ namespace AutoPartsPOS.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("InvoiceId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int?>("ProductId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -363,30 +416,6 @@ namespace AutoPartsPOS.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("SalesInvoiceItems");
-                });
-
-            modelBuilder.Entity("AutoPartsPOS.Models.Supplier", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("AutoPartsPOS.Models.User", b =>
@@ -455,34 +484,60 @@ namespace AutoPartsPOS.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AutoPartsPOS.Models.PurchaseInvoice", b =>
+            modelBuilder.Entity("AutoPartsPOS.Models.Maintenances.Maintenance", b =>
                 {
-                    b.HasOne("AutoPartsPOS.Models.Supplier", "Supplier")
-                        .WithMany("PurchaseInvoices")
-                        .HasForeignKey("SupplierId")
+                    b.HasOne("AutoPartsPOS.Models.Customer", "Customer")
+                        .WithMany("Maintenances")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AutoPartsPOS.Models.SalesInvoice", "SalesInvoice")
+                        .WithOne("Maintenance")
+                        .HasForeignKey("AutoPartsPOS.Models.Maintenances.Maintenance", "SalesInvoiceId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("AutoPartsPOS.Models.User", "Technician")
+                        .WithMany("AssignedMaintenances")
+                        .HasForeignKey("TechnicianId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("SalesInvoice");
+
+                    b.Navigation("Technician");
+                });
+
+            modelBuilder.Entity("AutoPartsPOS.Models.Maintenances.MaintenanceHoldItem", b =>
+                {
+                    b.HasOne("AutoPartsPOS.Models.Maintenances.Maintenance", "Maintenance")
+                        .WithMany("HoldItems")
+                        .HasForeignKey("MaintenanceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Supplier");
+                    b.Navigation("Maintenance");
                 });
 
-            modelBuilder.Entity("AutoPartsPOS.Models.PurchaseInvoiceItem", b =>
+            modelBuilder.Entity("AutoPartsPOS.Models.Maintenances.MaintenanceItem", b =>
                 {
-                    b.HasOne("AutoPartsPOS.Models.PurchaseInvoice", "PurchaseInvoice")
-                        .WithMany("PurchaseInvoiceItems")
-                        .HasForeignKey("InvoiceId")
+                    b.HasOne("AutoPartsPOS.Models.Maintenances.Maintenance", "Maintenance")
+                        .WithMany("Items")
+                        .HasForeignKey("MaintenanceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AutoPartsPOS.Models.Product", "Product")
-                        .WithMany("PurchaseInvoiceItems")
+                        .WithMany("MaintenanceItems")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Product");
+                    b.Navigation("Maintenance");
 
-                    b.Navigation("PurchaseInvoice");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("AutoPartsPOS.Models.Return", b =>
@@ -491,29 +546,15 @@ namespace AutoPartsPOS.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
-                    b.HasOne("AutoPartsPOS.Models.PurchaseInvoice", "PurchaseInvoice")
-                        .WithMany("Returns")
-                        .HasForeignKey("PurchaseInvoiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("AutoPartsPOS.Models.SalesInvoice", "SalesInvoice")
                         .WithMany("Returns")
                         .HasForeignKey("SalesInvoiceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("AutoPartsPOS.Models.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId");
-
                     b.Navigation("Customer");
 
-                    b.Navigation("PurchaseInvoice");
-
                     b.Navigation("SalesInvoice");
-
-                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("AutoPartsPOS.Models.ReturnItem", b =>
@@ -559,13 +600,13 @@ namespace AutoPartsPOS.Migrations
                     b.HasOne("AutoPartsPOS.Models.Customer", "Customer")
                         .WithMany("SalesInvoices")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AutoPartsPOS.Models.User", "User")
                         .WithMany("SalesInvoices")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Customer");
@@ -584,7 +625,7 @@ namespace AutoPartsPOS.Migrations
                     b.HasOne("AutoPartsPOS.Models.Product", "Product")
                         .WithMany("SalesInvoiceItems")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -613,21 +654,23 @@ namespace AutoPartsPOS.Migrations
 
             modelBuilder.Entity("AutoPartsPOS.Models.Customer", b =>
                 {
+                    b.Navigation("Maintenances");
+
                     b.Navigation("SalesInvoices");
+                });
+
+            modelBuilder.Entity("AutoPartsPOS.Models.Maintenances.Maintenance", b =>
+                {
+                    b.Navigation("HoldItems");
+
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("AutoPartsPOS.Models.Product", b =>
                 {
-                    b.Navigation("PurchaseInvoiceItems");
+                    b.Navigation("MaintenanceItems");
 
                     b.Navigation("SalesInvoiceItems");
-                });
-
-            modelBuilder.Entity("AutoPartsPOS.Models.PurchaseInvoice", b =>
-                {
-                    b.Navigation("PurchaseInvoiceItems");
-
-                    b.Navigation("Returns");
                 });
 
             modelBuilder.Entity("AutoPartsPOS.Models.Return", b =>
@@ -644,18 +687,18 @@ namespace AutoPartsPOS.Migrations
 
             modelBuilder.Entity("AutoPartsPOS.Models.SalesInvoice", b =>
                 {
+                    b.Navigation("Maintenance")
+                        .IsRequired();
+
                     b.Navigation("Returns");
 
                     b.Navigation("SalesInvoiceItems");
                 });
 
-            modelBuilder.Entity("AutoPartsPOS.Models.Supplier", b =>
-                {
-                    b.Navigation("PurchaseInvoices");
-                });
-
             modelBuilder.Entity("AutoPartsPOS.Models.User", b =>
                 {
+                    b.Navigation("AssignedMaintenances");
+
                     b.Navigation("SalesInvoices");
 
                     b.Navigation("UserRoles");

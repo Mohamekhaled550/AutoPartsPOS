@@ -1,38 +1,43 @@
 using Microsoft.EntityFrameworkCore;
 using AutoPartsPOS.Models;
+using AutoPartsPOS.Models.Maintenances;
 
 namespace AutoPartsPOS.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options) { }
 
+        // ================= AUTH =================
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
 
-
-
-        // جداول النظام الأساسية للDashboard
-          // جداول النظام
+        // ================= CORE =================
         public DbSet<Customer> Customers { get; set; }
-        public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Product> Products { get; set; }
+
         public DbSet<SalesInvoice> SalesInvoices { get; set; }
         public DbSet<SalesInvoiceItem> SalesInvoiceItems { get; set; }
-        public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
-        public DbSet<PurchaseInvoiceItem> PurchaseInvoiceItems { get; set; }
+
         public DbSet<Return> Returns { get; set; }
         public DbSet<ReturnItem> ReturnItems { get; set; }
 
         public DbSet<CashTransaction> CashTransactions { get; set; }
 
+        // ================= MAINTENANCE =================
+        public DbSet<Maintenance> Maintenances { get; set; }
+        public DbSet<MaintenanceItem> MaintenanceItems { get; set; }
+        public DbSet<MaintenanceHoldItem> MaintenanceHoldItems { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // ================= AUTH =================
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
 
@@ -59,69 +64,77 @@ namespace AutoPartsPOS.Data
                 .WithMany()
                 .HasForeignKey(rp => rp.PermissionId);
 
-
-
-            // علاقات النظام
+            // ================= SALES =================
             modelBuilder.Entity<SalesInvoice>()
                 .HasOne(si => si.Customer)
                 .WithMany(c => c.SalesInvoices)
-                .HasForeignKey(si => si.CustomerId);
+                .HasForeignKey(si => si.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<SalesInvoice>()
                 .HasOne(si => si.User)
                 .WithMany(u => u.SalesInvoices)
-                .HasForeignKey(si => si.UserId);
+                .HasForeignKey(si => si.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<SalesInvoiceItem>()
                 .HasOne(sii => sii.SalesInvoice)
                 .WithMany(si => si.SalesInvoiceItems)
-                .HasForeignKey(sii => sii.InvoiceId);
+                .HasForeignKey(sii => sii.InvoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<SalesInvoiceItem>()
                 .HasOne(sii => sii.Product)
                 .WithMany(p => p.SalesInvoiceItems)
-                .HasForeignKey(sii => sii.ProductId);
+                .HasForeignKey(sii => sii.ProductId)
+                .IsRequired(false) // ضيف السطر ده فوراً
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<PurchaseInvoice>()
-                .HasOne(pi => pi.Supplier)
-                .WithMany(s => s.PurchaseInvoices)
-                .HasForeignKey(pi => pi.SupplierId);
+            // ================= RETURNS =================
+            modelBuilder.Entity<Return>()
+                .HasOne(r => r.SalesInvoice)
+                .WithMany(si => si.Returns)
+                .HasForeignKey(r => r.SalesInvoiceId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<PurchaseInvoiceItem>()
-                .HasOne(pii => pii.PurchaseInvoice)
-                .WithMany(pi => pi.PurchaseInvoiceItems)
-                .HasForeignKey(pii => pii.InvoiceId);
+            // ================= MAINTENANCE =================
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.Customer)
+                .WithMany(c => c.Maintenances) // كل العمليات المرتبطة بالعميل
+                .HasForeignKey(m => m.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<PurchaseInvoiceItem>()
-                .HasOne(pii => pii.Product)
-                .WithMany(p => p.PurchaseInvoiceItems)
-                .HasForeignKey(pii => pii.ProductId);
-// ================= RETURNS =================
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.Technician)
+                .WithMany(u => u.AssignedMaintenances) // كل العمليات المكلف بها الفني
+                .HasForeignKey(m => m.TechnicianId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-// Sales Return
-modelBuilder.Entity<Return>()
-    .HasOne(r => r.SalesInvoice)
-    .WithMany(si => si.Returns)
-    .HasForeignKey(r => r.SalesInvoiceId)
-    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.SalesInvoice)
+                .WithOne(si => si.Maintenance)
+                .HasForeignKey<Maintenance>(m => m.SalesInvoiceId)
+                .IsRequired(false) // أضف السطر ده عشان نأكد إنه مش إجباري
+                .OnDelete(DeleteBehavior.SetNull);
 
-// Purchase Return
-modelBuilder.Entity<Return>()
-    .HasOne(r => r.PurchaseInvoice)
-    .WithMany(pi => pi.Returns)
-    .HasForeignKey(r => r.PurchaseInvoiceId)
-    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<MaintenanceItem>()
+                .HasOne(mi => mi.Maintenance)
+                .WithMany(m => m.Items)
+                .HasForeignKey(mi => mi.MaintenanceId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<MaintenanceItem>()
+                .HasOne(mi => mi.Product)
+                .WithMany(p => p.MaintenanceItems)
+                .HasForeignKey(mi => mi.ProductId)
+                .IsRequired(false) // دي الضمان الأكيد
+                .OnDelete(DeleteBehavior.Restrict);
 
-
-modelBuilder.Entity<Return>()
-    .HasCheckConstraint(
-        "CK_Return_InvoiceType",
-        @"(ReturnType = 1 AND SalesInvoiceId IS NOT NULL AND PurchaseInvoiceId IS NULL)
-       OR (ReturnType = 2 AND PurchaseInvoiceId IS NOT NULL AND SalesInvoiceId IS NULL)"
-    );
-
-
+            modelBuilder.Entity<MaintenanceHoldItem>()
+                .HasOne(h => h.Maintenance)
+                .WithMany(m => m.HoldItems)
+                .HasForeignKey(h => h.MaintenanceId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

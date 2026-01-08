@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-
+using AutoPartsPOS.Models.Maintenances;
 namespace AutoPartsPOS.Models
 {
     public class Customer
@@ -11,5 +11,6 @@ namespace AutoPartsPOS.Models
 
         // Navigation
         public ICollection<SalesInvoice> ?SalesInvoices { get; set; }
+        public ICollection<Maintenance> ?Maintenances { get; set; } // كل العمليات المرتبطة بالعميل
     }
 }
