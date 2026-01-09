@@ -22,13 +22,15 @@ namespace AutoPartsPOS.Controllers
             _context = context;
         }
 
+
         // 1. عرض قائمة الصيانات
-        [AuthorizePermission("Maintenance_Read")]
+        [AuthorizePermission("Maintenance_View")]
         public IActionResult Index()
         {
             var maintenances = _context.Maintenances
                 .Include(m => m.Customer)
                 .Include(m => m.Technician)
+                .Include(m => m.Items)         // ده السطر اللي ناقص! تحميل قطع الغيار
                 .OrderByDescending(m => m.CreatedAt)
                 .ToList();
             return View(maintenances);
@@ -43,14 +45,25 @@ namespace AutoPartsPOS.Controllers
             ViewBag.Products = _context.Products.Where(p => p.Quantity > 0).ToList();
             return View();
         }
+ 
+        [HttpGet]
+        [ValidateAntiForgeryToken]
+        [AuthorizePermission("Maintenance_Create")]
 
-
+public IActionResult GetCustomerHoldItems(int customerId)
+{
+    var items = _context.MaintenanceHoldItems
+        .Where(h => h.Maintenance.CustomerId == customerId && !h.IsDelivered)
+        .Select(h => h.ItemName)
+        .ToList();
+    return Json(items);
+}
 
         // 3. الأكشن الأساسي لحفظ الصيانة وتحويلها لفاتورة
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthorizePermission("Maintenance_Create")]
-        public IActionResult Create(Maintenance model, string itemsJson)
+        public IActionResult Create(Maintenance model, string itemsJson ,string holdItemsJson )
         {
             // فك بيانات قطع الغيار المبعوتة من الجدول في الـ View
             var itemsDto = new List<MaintenanceItemDto>();
@@ -165,7 +178,28 @@ namespace AutoPartsPOS.Controllers
                         UserId = userId
                     });
                 }
-                
+ // --- و. معالجة الأصناف المحتجزة (الأمانات) ---
+if (!string.IsNullOrEmpty(holdItemsJson))
+{
+    // تحويل النص الجاي من الـ View إلى قائمة نصوص
+    var holdItemsNames = JsonSerializer.Deserialize<List<string>>(holdItemsJson);
+    
+    foreach (var name in holdItemsNames)
+    {
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            _context.MaintenanceHoldItems.Add(new MaintenanceHoldItem
+            {
+                MaintenanceId = model.Id, // ربطها بعملية الصيانة الحالية
+                ItemName = name,
+                IsDelivered = false,       // الحالة الافتراضية: لم تُرد للعميل
+            });
+        }
+    }
+}
+
+
+    
 
                 _context.SaveChanges();
                 tx.Commit();
@@ -208,15 +242,35 @@ namespace AutoPartsPOS.Controllers
             return View(maintenance);
         }
 
+        
 
-[HttpGet]
-public IActionResult GetCustomerHoldItems(int customerId)
+        [AuthorizePermission("Maintenance_Technician_Report")]
+
+public IActionResult TechnicianReport(int? technicianId, int? month, int? year, decimal commissionRate = 0)
 {
-    var items = _context.MaintenanceHoldItems
-        .Where(h => h.Maintenance.CustomerId == customerId && !h.IsDelivered)
-        .Select(h => h.ItemName)
-        .ToList();
-    return Json(items);
+    // الافتراضي الشهر والسنة الحالية
+    int targetMonth = month ?? DateTime.Now.Month;
+    int targetYear = year ?? DateTime.Now.Year;
+
+    var query = _context.Maintenances.AsQueryable();
+
+    if (technicianId.HasValue)
+    {
+        query = query.Where(m => m.TechnicianId == technicianId);
+    }
+
+    var data = query.Where(m => m.CreatedAt.Month == targetMonth && m.CreatedAt.Year == targetYear)
+                    .Select(m => new { m.ServicePrice }) // نأخذ سعر المصنعية فقط
+                    .ToList();
+
+    ViewBag.TotalOperations = data.Count;
+    ViewBag.TotalServiceRevenue = data.Sum(m => m.ServicePrice);
+    ViewBag.CommissionRate = commissionRate;
+    ViewBag.TechnicianProfit = data.Sum(m => m.ServicePrice) * (commissionRate / 100);
+    
+    ViewBag.Technicians = _context.Users.Where(u => u.RoleId == 10).ToList(); // تعديل حسب الـ Role عندك
+
+    return View();
 }
 
 

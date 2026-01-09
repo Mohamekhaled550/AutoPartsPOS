@@ -83,7 +83,7 @@ body:has(.sidebar:not(.collapsed)) .navbar {
     padding-top: 50px;
 }
 
-.sidebar.collapsed { width: 65px; }
+.sidebar.collapsed { width: 15px; }
 
 .sidebar ul { list-style: none; padding: 10px 0; margin: 0; }
 
@@ -344,3 +344,220 @@ body:has(.sidebar:not(.collapsed)) .navbar {
     margin-bottom: 20px;
     transition: background 0.3s;
 }
+
+
+
+
+/* ========================================================== */
+/* 2. تحسين الكروت - Premium Cards Design                    */
+/* ========================================================== */
+.card {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: var(--card-shadow) !important;
+    transition: transform 0.3s ease;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    padding: 1.25rem !important;
+    font-weight: 700 !important;
+    font-size: 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+    display: flex;
+    align-items: center;
+}
+
+/* تخصيص ألوان الكروت لتناسب النظام العالمي */
+.card.border-primary .card-header { background: var(--primary-gradient) !important; color: #fff !important; }
+.card.border-success .card-header { background: var(--success-gradient) !important; color: #fff !important; }
+.card.border-warning .card-header { background: #f59e0b !important; color: #fff !important; }
+
+/* ========================================================== */
+/* 3. الحقول والمدخلات - Modern Form Elements                 */
+/* ========================================================== */
+.form-group label {
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    border-radius: 10px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    padding: 0.6rem 1rem !important;
+    transition: all 0.2s ease-in-out !important;
+    font-size: 0.95rem;
+}
+
+.form-control:focus {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 0 3px var(--input-focus) !important;
+    outline: none;
+}
+
+/* تحسين الـ Select2 لو استخدمته */
+.select2-container--default .select2-selection--single {
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    height: 42px !important;
+}
+
+/* ========================================================== */
+/* 4. الجداول - Clean Data Tables                            */
+/* ========================================================== */
+#itemsTable {
+    border-radius: 12px;
+    overflow: hidden;
+    border: none !important;
+}
+
+#itemsTable thead th {
+    background-color: #f8fafc !important;
+    color: #64748b !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border: none !important;
+    padding: 15px;
+}
+
+#itemsTable tbody td {
+    vertical-align: middle !important;
+    padding: 15px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+#itemsTable tfoot tr {
+    background-color: #f8fafc;
+}
+
+#finalTotal {
+    color: #ef4444;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+/* ========================================================== */
+/* 5. الأزرار - Interactive Buttons                          */
+/* ========================================================== */
+.btn {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    padding: 0.6rem 1.5rem !important;
+    transition: all 0.3s ease !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-success {
+    background: var(--success-gradient) !important;
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3) !important;
+}
+
+.btn-primary {
+    background: var(--primary-gradient) !important;
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(30, 41, 59, 0.3) !important;
+}
+
+.btn-warning {
+    color: #92400e !important;
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* زر الحفظ العائم/الكبير */
+#btnSubmitForm {
+    width: 100%;
+    padding: 1rem !important;
+    font-size: 1.2rem !important;
+    border-radius: 14px !important;
+    margin-top: 20px;
+}
+
+/* ========================================================== */
+/* 6. قائمة الأمانات - Information Flow                      */
+/* ========================================================== */
+#holdItemsList .list-group-item {
+    background-color: var(--warning-soft) !important;
+    border: 1px solid #fef3c7 !important;
+    margin-bottom: 8px !important;
+    border-radius: 10px !important;
+    color: #92400e;
+    font-weight: 600;
+    font-size: 0.9rem;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* ========================================================== */
+/* 7. لمسات إضافية - Micro-interactions                      */
+/* ========================================================== */
+.alert {
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+hr {
+    border-top: 2px solid #e2e8f0 !important;
+    width: 50px;
+    margin-right: 0;
+    margin-bottom: 2rem;
+}
+
+/* تحسين العرض على الموبايل */
+@media (max-width: 768px) {
+    .container { padding: 10px; }
+    .col-md-4, .col-md-8 { padding: 5px; }
+}
+
+
+
+
+
+
+
+/* تنسيق رقم الفاتورة كـ رابط احترافي */
+.invoice-link {
+    color: #3b82f6; /* لون أزرق براند */
+    font-weight: 700;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background-color: rgba(59, 130, 246, 0.1); /* خلفية زرقاء خفيفة جداً */
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.invoice-link:hover {
+    background-color: #3b82f6; /* بيتحول للون الأزرق الكامل عند الوقوف عليه */
+    color: #ffffff !important;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* إضافة علامة # قبل الرقم بشكل جمالي */
+.invoice-link::before {
+    content: "ID: ";
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+
+

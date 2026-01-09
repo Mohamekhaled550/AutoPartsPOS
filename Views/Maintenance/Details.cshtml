@@ -2,51 +2,184 @@
 
 @{
     ViewData["Title"] = "تفاصيل عملية الصيانة";
-    var totalParts = Model.Items.Where(i => !i.IsService).Sum(i => i.Price * i.Quantity);
+    var totalParts = Model.Items.Sum(i => i.Price * i.Quantity);
 }
+
+<style>
+    /* تنسيقات الشاشة الأساسية */
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .card {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+    }
+
+    /* تكبير وتوضيح قسم البيانات */
+    .info-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        height: 100%;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+    }
+
+    .info-label {
+        font-weight: 800;
+        color: #64748b;
+        min-width: 110px;
+        margin-left: 10px;
+    }
+
+    .info-value {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1.2rem;
+    }
+
+    .status-large {
+        font-size: 1.3rem !important;
+        padding: 10px 25px !important;
+        border-radius: 50px !important;
+        display: inline-block;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    /* الجدول */
+    .table thead th {
+        background-color: #1e3a8a !important;
+        color: white !important;
+        font-size: 1rem;
+        padding: 15px !important;
+    }
+
+    .table tbody td {
+        padding: 15px !important;
+        font-size: 1.1rem;
+        vertical-align: middle !important;
+    }
+
+    .service-row {
+        background-color: #fffde7 !important;
+        font-weight: bold;
+    }
+
+    /* قسم الأمانات المفقود */
+    .hold-items-box {
+        background-color: #fff8e1;
+        border: 2px dashed #ffc107;
+        border-radius: 15px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+
+    .hold-item-entry {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* قسم الإجمالي */
+    .total-card {
+        background: #1e3a8a;
+        color: white;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .total-card h2 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-top: 10px;
+    }
+@@media print {
+        /* إخفاء الناف بار والفوتر وأي عناصر تحكم نهائياً */
+        nav, .navbar, header, footer, .d-print-none, .btn, .sidebar {
+            display: none !important;
+            height: 0 !important;
+            visibility: hidden !important;
+        }
+</style>
 
 <div class="container mt-4 mb-5">
     <div class="d-print-none mb-3 text-left">
-        <button onclick="window.print()" class="btn btn-dark">
-            <i class="fa fa-print"></i> طباعة الفاتورة
+        <button onclick="window.print()" class="btn btn-dark btn-lg shadow-sm">
+            <i class="fa fa-print"></i> طباعة الفاتورة الفورية
         </button>
-        <a asp-action="Index" class="btn btn-secondary">العودة للقائمة</a>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-lg shadow-sm">العودة</a>
     </div>
 
-    <div class="card shadow border-0" id="invoice-card">
-        <div class="card-body">
-            <div class="row mb-4">
-                <div class="col-6 text-right">
-                    <h2 class="text-primary">ورشة قطع الغيار والصيانة</h2>
-                    <p>عنوان الورشة: القاهرة، مصر<br>هاتف: 0123456789</p>
-                </div>
-                <div class="col-6 text-left">
-                    <h4 class="font-weight-bold">فاتورة صيانة رقم: #@Model.Id</h4>
-                    <p>التاريخ: @Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")</p>
-                    <span class="badge badge-success">الحالة: @Model.Status</span>
-                </div>
-            </div>
-
-            <hr>
-
-            <div class="row mb-4 text-right">
+    <div class="card shadow border-0 text-right">
+        <div class="card-body p-5">
+            
+            <div class="row mb-5 align-items-center">
                 <div class="col-6">
-                    <h6 class="text-muted">العميل:</h6>
-                    <h5 class="font-weight-bold">@Model.Customer?.Name</h5>
-                    <p>رقم العميل: @Model.Customer?.Phone</p>
+                    <h1 class="text-primary font-weight-bold mb-0">مركز صيانة أوتو بارتس</h1>
+                    <h5 class="text-muted">نظام إدارة الفواتير الذكي</h5>
                 </div>
                 <div class="col-6 text-left">
-                    <h6 class="text-muted">الفني المسؤول:</h6>
-                    <h5 class="font-weight-bold">@Model.Technician?.FullName</h5>
+                    <div class="p-3 border rounded bg-light d-inline-block">
+                        <h4 class="mb-1 font-weight-bold">رقم الفاتورة: <span class="text-danger">#@Model.Id</span></h4>
+                        <p class="mb-0 text-muted">تاريخ الإصدار: @Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")</p>
+                    </div>
                 </div>
             </div>
 
-            <h5 class="text-right font-weight-bold mb-3">تفاصيل الخدمات وقطع الغيار:</h5>
+            <div class="row mb-5">
+                <div class="col-md-5">
+                    <div class="info-box">
+                        <h6 class="text-primary border-bottom pb-2 mb-3 font-weight-bold"><i class="fa fa-user"></i> معلومات العميل</h6>
+                        <div class="info-item">
+                            <span class="info-label">اسم العميل:</span>
+                            <span class="info-value">@Model.Customer?.Name</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">رقم الهاتف:</span>
+                            <span class="info-value">@Model.Customer?.Phone</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="info-box">
+                        <h6 class="text-primary border-bottom pb-2 mb-3 font-weight-bold"><i class="fa fa-info-circle"></i> تفاصيل التنفيذ</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="info-item">
+                                    <span class="info-label">الفني:</span>
+                                    <span class="info-value text-info">@Model.Technician?.FullName</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">نوع العملية:</span>
+                                    <span class="info-value">@(Model.Type.ToString() == "External" ? "خارجية" : "داخلية")</span>
+                                </div>
+                            </div>
+                            <div class="col-6 text-left">
+                                <span class="info-label d-block mb-2">حالة الفاتورة</span>
+                                <span class="badge badge-success status-large">@Model.Status</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <table class="table table-bordered text-center">
-                <thead class="bg-light">
+                <thead>
                     <tr>
-                        <th>#</th>
-                        <th class="text-right">الوصف / الصنف</th>
+                        <th style="width: 60px;">#</th>
+                        <th class="text-right">الوصف (قطعة الغيار / الخدمة)</th>
                         <th>السعر</th>
                         <th>الكمية</th>
                         <th>الإجمالي</th>
@@ -54,23 +187,21 @@
                 </thead>
                 <tbody>
                     @{ int count = 1; }
-                    
                     @foreach (var item in Model.Items)
                     {
                         <tr>
                             <td>@(count++)</td>
-                            <td class="text-right">@item.Description</td>
+                            <td class="text-right font-weight-bold">@item.Description</td>
                             <td>@item.Price.ToString("N2")</td>
                             <td>@item.Quantity</td>
-                            <td>@((item.Price * item.Quantity).ToString("N2"))</td>
+                            <td class="font-weight-bold">@((item.Price * item.Quantity).ToString("N2"))</td>
                         </tr>
                     }
-                    
                     @if (Model.ServicePrice > 0)
                     {
-                        <tr class="font-italic bg-light">
+                        <tr class="service-row">
                             <td>@count</td>
-                            <td class="text-right">مصنعية (أجور يد) - @Model.Name</td>
+                            <td class="text-right font-weight-bold">أجور اليد (المصنعية) - @Model.Name</td>
                             <td>@Model.ServicePrice.ToString("N2")</td>
                             <td>1</td>
                             <td>@Model.ServicePrice.ToString("N2")</td>
@@ -79,43 +210,52 @@
                 </tbody>
             </table>
 
-            <div class="row mt-4">
-                <div class="col-md-7 text-right">
-                    <p class="font-weight-bold">ملاحظات الصيانة:</p>
-                    <div class="p-2 border rounded bg-light" style="min-height: 80px;">
-                        @(string.IsNullOrEmpty(Model.Notes) ? "لا توجد ملاحظات إضافية" : Model.Notes)
+            <div class="row mt-5">
+                <div class="col-md-7">
+                    <div class="p-4 border rounded bg-light">
+                        <h6 class="font-weight-bold mb-2 text-muted uppercase small">الملاحظات الفنية:</h6>
+                        <p class="mb-0 font-weight-bold" style="font-size: 1.1rem;">
+                            @(string.IsNullOrEmpty(Model.Notes) ? "لا توجد ملاحظات." : Model.Notes)
+                        </p>
                     </div>
+
+                    @if (Model.HoldItems != null && Model.HoldItems.Any())
+                    {
+                        <div class="hold-items-box">
+                            <h6 class="font-weight-bold text-dark mb-3"><i class="fa fa-archive"></i> الأمانات والقطع المحتجزة تحت الحفظ:</h6>
+                            @foreach (var hold in Model.HoldItems)
+                            {
+                                <div class="hold-item-entry">
+                                    <span class="font-weight-bold"><i class="fa fa-caret-left"></i> @hold.ItemName</span>
+                                    <span class="badge @(hold.IsDelivered ? "badge-success" : "badge-danger")">
+                                        @(hold.IsDelivered ? "تم التسليم للعميل" : "لا تزال بالمخزن")
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
+                
                 <div class="col-md-5">
-                    <table class="table table-sm border-0">
-                        <tr>
-                            <th class="text-right border-0">إجمالي قطع الغيار:</th>
-                            <td class="text-left border-0">@totalParts.ToString("N2")</td>
-                        </tr>
-                        <tr>
-                            <th class="text-right border-0">المصنعية:</th>
-                            <td class="text-left border-0">@Model.ServicePrice.ToString("N2")</td>
-                        </tr>
-                        <tr class="h4 font-weight-bold bg-primary text-white">
-                            <th class="text-right border-0">الإجمالي النهائي:</th>
-                            <td class="text-left border-0">@((totalParts + Model.ServicePrice).ToString("N2"))</td>
-                        </tr>
-                    </table>
+                    <div class="total-card shadow">
+                        <h5 class="mb-0">المبلغ الإجمالي النهائي</h5>
+                        <h2>@((totalParts + Model.ServicePrice).ToString("N2")) <small>ج.م</small></h2>
+                        <hr style="border-top: 1px solid rgba(255,255,255,0.2)">
+                        <div class="d-flex justify-content-between px-3" style="font-size: 0.9rem; opacity: 0.9;">
+                            <span>قطع الغيار: @totalParts.ToString("N2")</span>
+                            <span>المصنعية: @Model.ServicePrice.ToString("N2")</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="card-footer text-center bg-white border-top-0 d-none d-print-block">
-            <p class="text-muted">شكراً لثقتكم بنا - تم إصدار هذه الفاتورة إلكترونياً</p>
+
+        <div class="card-footer bg-white d-none d-print-block pt-5 border-0">
+            <div class="row text-center">
+                <div class="col-4"><div class="border-top pt-2 font-weight-bold">توقيع العميل</div></div>
+                <div class="col-4"><div class="border-top pt-2 font-weight-bold">المحاسب</div></div>
+                <div class="col-4"><div class="border-top pt-2 font-weight-bold">ختم المركز</div></div>
+            </div>
         </div>
     </div>
 </div>
-
-<style>
-    @@media print {
-        body { background: white !important; }
-        .navbar, .btn, .d-print-none { display: none !important; }
-        .container { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-        .card { border: none !important; box-shadow: none !important; }
-        .bg-primary { background-color: #007bff !important; -webkit-print-color-adjust: exact; }
-    }
-</style>

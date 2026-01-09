@@ -1,185 +1,232 @@
-@model List<AutoPartsPOS.Models.SalesInvoice>
+@model IEnumerable<AutoPartsPOS.Models.SalesInvoice>
 
+@{
+    ViewData["Title"] = "تحصيل فواتير الآجل المجمع";
+    // تجميع الفواتير حسب العميل لتقليل الفوضى في الصفحة
+    var groupedInvoices = Model.GroupBy(i => i.Customer?.Id).ToList();
+}
 
 <style>
     /* حاوية الصفحة */
     .collection-container {
-        background: white;
-        padding: 25px;
+        background: #f8fafc;
+        padding: 20px;
         border-radius: 15px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
         margin-top: 20px;
     }
 
-    /* عنوان الصفحة */
     .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 25px;
-        border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 15px;
+        margin-bottom: 20px;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
 
-    .page-header h2 {
+    /* كارت العميل (Accordion Header) */
+    .customer-group-header {
+        background: white;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 8px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 25px;
+    }
+
+    .customer-group-header:hover {
+        background: #f1f5f9;
+        border-color: #3b82f6;
+    }
+
+    .customer-group-header.active {
+        border-right: 5px solid #10b981;
+        background: #f0fdf4;
+    }
+
+    .debt-badge {
+        background: #fee2e2;
+        color: #ef4444;
+        padding: 5px 15px;
+        border-radius: 20px;
         font-weight: 800;
-        color: #1e293b;
-        margin: 0;
+        font-size: 0.9rem;
     }
 
-    /* تحسين الجدول */
+    /* حاوية الفواتير المخفية */
+    .invoices-wrapper {
+        display: none;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: white;
+        border-radius: 0 0 10px 10px;
+        border: 1px solid #e2e8f0;
+        border-top: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    /* الجدول الداخلي */
     .custom-table {
         width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
+        text-align: right;
+        border-collapse: collapse;
     }
 
     .custom-table thead th {
         background: #f8fafc;
+        padding: 12px;
         color: #64748b;
-        font-weight: 700;
-        padding: 15px;
-        border-bottom: 2px solid #e2e8f0;
-        text-align: right;
+        font-size: 0.85rem;
     }
 
     .custom-table tbody td {
-        padding: 15px;
+        padding: 12px;
         border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
-        color: #334155;
-        font-size: 0.95rem;
     }
 
-    .custom-table tbody tr:hover {
-        background-color: #f8fafc;
-    }
-
-    /* تمييز الأرقام */
-    .amount-total { font-weight: 700; color: #1e293b; }
-    .amount-paid { font-weight: 700; color: #3b82f6; }
+    /* مبالغ التحصيل */
     .amount-remaining { 
         font-weight: 800; 
         color: #ef4444; 
-        background: #fee2e2; 
-        padding: 4px 10px; 
-        border-radius: 8px; 
     }
 
-    /* تنسيق فورم التحصيل داخل الجدول */
     .collect-form {
         display: flex;
-        gap: 8px;
-        align-items: center;
+        gap: 5px;
     }
 
     .collect-input {
-        width: 120px !important;
-        height: 38px;
-        border-radius: 8px;
+        width: 100px !important;
+        border-radius: 6px;
         border: 1px solid #cbd5e1;
-        padding: 0 10px;
-        font-weight: 700;
+        font-weight: bold;
+        text-align: center;
     }
 
     .btn-collect {
         background: #10b981;
         color: white;
         border: none;
-        padding: 0 15px;
-        height: 38px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        white-space: nowrap;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        transition: 0.2s;
     }
 
-    .btn-collect:hover {
-        background: #059669;
-        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-    }
+    .btn-collect:hover { background: #059669; }
 
-    /* التنبيهات */
-    .alert {
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 20px;
-        border: none;
-        font-weight: 600;
+    .chevron-icon { transition: 0.3s; color: #cbd5e1; }
+    .active .chevron-icon { transform: rotate(180deg); color: #10b981; }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 
-
 <div class="collection-container">
-    <div class="page-header">
-        <h2>تحصيل فواتير الآجل <i class="fas fa-file-invoice-dollar text-primary"></i></h2>
-        <span class="badge bg-primary">عدد الفواتير: @Model.Count</span>
+    <div class="page-header text-right">
+        <div>
+            <h2>تحصيل مديونيات العملاء <i class="fas fa-hand-holding-usd text-success"></i></h2>
+            <p class="text-muted mb-0">تتم عرض الفواتير المتبقية فقط لكل عميل</p>
+        </div>
+        <div class="text-left">
+            <span class="badge bg-dark p-2">إجمالي العملاء المدينين: @groupedInvoices.Count</span>
+        </div>
     </div>
 
-    @if(TempData["Error"] != null)
-    {
-        <div class="alert alert-danger shadow-sm">
-            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
-        </div>
-    }
-    @if(TempData["Success"] != null)
-    {
-        <div class="alert alert-success shadow-sm">
-            <i class="fas fa-check-circle"></i> @TempData["Success"]
-        </div>
+    @if(TempData["Success"] != null) {
+        <div class="alert alert-success">@TempData["Success"]</div>
     }
 
-    <div class="table-responsive">
-        <table class="custom-table">
-            <thead>
-                <tr>
-                    <th>رقم الفاتورة</th>
-                    <th>العميل</th>
-                    <th>التاريخ</th>
-                    <th>الإجمالي</th>
-                    <th>المدفوع</th>
-                    <th>المتبقي</th>
-                    <th style="width: 250px;">إجراء التحصيل</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var invoice in Model)
-                {
-                    <tr>
-                        <td style="font-weight: bold;">#@invoice.Id</td>
-                        <td>
-                            <i class="fas fa-user-circle text-muted"></i> @invoice.Customer?.Name
-                        </td>
-                        <td class="text-muted">@invoice.InvoiceDate.ToString("yyyy-MM-dd")</td>
-                        <td class="amount-total">@invoice.Total.ToString("N2")</td>
-                        <td class="amount-paid">@invoice.Paid.ToString("N2")</td>
-                        <td>
-                            <span class="amount-remaining">
-                                @((invoice.Total - invoice.Paid).ToString("N2"))
-                            </span>
-                        </td>
-                        <td>
-                            <form asp-action="Collect" method="post" class="collect-form">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="invoiceId" value="@invoice.Id" />
-                                
-                                <input type="number" name="amount" step="0.01" min="0.01" 
-                                       max="@(invoice.Total - invoice.Paid)" 
-                                       class="collect-input" 
-                                       placeholder="المبلغ" required />
-                                
-                                <button type="submit" class="btn-collect">
-                                    <i class="fas fa-hand-holding-usd"></i> تحصيل
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <div class="text-right">
+        @foreach (var group in groupedInvoices)
+        {
+            var firstInv = group.First();
+            var totalRemainingForCustomer = group.Sum(i => i.Total - i.Paid);
+            var customerId = group.Key ?? 0;
+
+            <div class="customer-group-header" onclick="toggleDebt('@customerId')">
+                <div>
+                    <span class="font-weight-bold" style="font-size: 1.1rem;">
+                        <i class="fas fa-user-circle ml-2 text-secondary"></i> @(firstInv.Customer?.Name ?? "عميل عام")
+                    </span>
+                    <br />
+                    <small class="text-muted mr-4">رقم الهاتف: @firstInv.Customer?.Phone</small>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="ml-3 text-muted" style="font-size: 0.9rem;">إجمالي المديونية:</span>
+                    <span class="debt-badge">@totalRemainingForCustomer.ToString("N2") ج.م</span>
+                    <i class="fas fa-chevron-down chevron-icon mr-3" id="icon-@customerId"></i>
+                </div>
+            </div>
+
+            <div class="invoices-wrapper" id="wrapper-@customerId">
+                <table class="custom-table text-center">
+                    <thead>
+                        <tr>
+                            <th>رقم الفاتورة</th>
+                            <th>التاريخ</th>
+                            <th>الإجمالي</th>
+                            <th>المدفوع</th>
+                            <th>المتبقي</th>
+                            <th style="width: 200px;">إجراء التحصيل السريع</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var invoice in group)
+                        {
+                            var remaining = invoice.Total - invoice.Paid;
+                            <tr>
+                                <td>
+                                    <a asp-controller="Maintenance" asp-action="Details" asp-route-id="@invoice.Id" class="badge badge-light p-2">
+                                        #@invoice.Id
+                                    </a>
+                                </td>
+                                <td class="text-muted">@invoice.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                                <td class="font-weight-bold">@invoice.Total.ToString("N2")</td>
+                                <td class="text-primary">@invoice.Paid.ToString("N2")</td>
+                                <td class="amount-remaining">@remaining.ToString("N2")</td>
+                                <td>
+                                    <form asp-action="Collect" method="post" class="collect-form justify-content-center">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="invoiceId" value="@invoice.Id" />
+                                        <input type="number" name="amount" step="0.01" max="@remaining" 
+                                               class="collect-input" placeholder="المبلغ" required />
+                                        <button type="submit" class="btn-collect">
+                                            تحصيل
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
 </div>
+
+<script>
+    function toggleDebt(id) {
+        const wrapper = document.getElementById('wrapper-' + id);
+        const header = wrapper.previousElementSibling;
+        
+        if (wrapper.style.display === 'block') {
+            wrapper.style.display = 'none';
+            header.classList.remove('active');
+        } else {
+            wrapper.style.display = 'block';
+            header.classList.add('active');
+        }
+    }
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />

@@ -1,49 +1,173 @@
 @model IEnumerable<AutoPartsPOS.Models.Maintenances.Maintenance>
-@{
-    ViewData["Title"] = "عمليات الصيانة";
+@section Styles {
+    <link rel="stylesheet" href="~/css/site1.css" asp-append-version="true" />
 }
 
-<h2>عمليات الصيانة</h2>
+@{
+    ViewData["Title"] = "إدارة عمليات الصيانة - عرض مجمع";
+    // تجميع البيانات حسب العميل
+    var groupedModel = Model.GroupBy(m => m.Customer?.Id).ToList();
+}
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>رقم العملية</th>
-            <th>اسم العملية</th>
-            <th>العميل</th>
-            <th>الفني</th>
-            <th>الحالة</th>
-            <th>فاتورة</th>
-            <th>تاريخ الإنشاء</th>
-            <th>إجراءات</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var m in Model)
-    {
-        <tr>
-            <td>@m.Id</td>
-            <td>@m.Name</td>
-            <td>@m.Customer.Name</td>
-            <td>@m.Technician.FullName</td>
-            <td>@m.Status</td>
-            <td>
-                @if(m.SalesInvoice != null)
-                {
-                    <span>فاتورة #@m.SalesInvoice.Id</span>
-                }
-                else
-                {
-                    <span>-</span>
-                }
-            </td>
-            <td>@m.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-            <td>
-                <a class="btn btn-sm btn-primary" href="@Url.Action("Details", new { id = m.Id })">عرض</a>
-            </td>
-        </tr>
+<style>
+    body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+    .main-card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 25px; margin-top: 20px; }
+    
+    /* سطر العميل (الأب) */
+    .customer-header {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
     }
-    </tbody>
-</table>
 
-<a class="btn btn-success" href="@Url.Action("Create")">إنشاء عملية جديدة</a>
+    .customer-header:hover { background-color: #f8fafc; border-color: #3b82f6; }
+    .customer-header.active { border-right: 5px solid #1e3a8a; background-color: #eff6ff; }
+
+    .customer-info h5 { margin: 0; color: #1e293b; font-weight: 700; }
+    .customer-info small { color: #64748b; }
+
+    .group-badge { background: #1e3a8a; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
+
+    /* حاوية الفواتير (الابن) */
+    .invoices-container {
+        display: none; /* مخفي افتراضياً */
+        margin-bottom: 20px;
+        padding: 0 10px;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @@keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* تنسيق الجدول الداخلي */
+    .inner-table { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
+    .inner-table thead th { background: #f1f5f9; color: #475569; padding: 10px; font-size: 0.9rem; border: none; }
+    .inner-table tbody td { background: white; padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+    .btn-action { border-radius: 8px; padding: 5px 12px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-collect { background-color: #10b981; color: white; border: none; }
+    .btn-collect:hover { background-color: #059669; color: white; }
+
+    .chevron-icon { transition: transform 0.3s ease; color: #cbd5e1; }
+    .active .chevron-icon { transform: rotate(180deg); color: #1e3a8a; }
+</style>
+
+<div class="container-fluid">
+    <div class="main-card">
+        <div class="page-header d-flex justify-content-between align-items-center mb-4 text-right">
+            <div>
+                <h2 class="text-primary font-weight-bold mb-0">سجل الصيانة المجمع</h2>
+                <p class="text-muted">عرض العمليات مجمعة حسب كل عميل</p>
+            </div>
+            <a class="btn btn-primary shadow-sm" style="border-radius: 10px;" href="@Url.Action("Create")">
+                <i class="fa fa-plus-circle"></i> إضافة عملية صيانة
+            </a>
+        </div>
+
+        <div class="text-right">
+            @foreach (var group in groupedModel)
+            {
+                var firstEntry = group.First();
+                var customerName = firstEntry.Customer?.Name ?? "عميل غير معروف";
+                var customerPhone = firstEntry.Customer?.Phone ?? "---";
+                var invoiceCount = group.Count();
+
+                <div class="customer-header" onclick="toggleInvoices('@group.Key')">
+                    <div class="d-flex align-items-center">
+                        <div class="customer-info">
+                            <h5><i class="fa fa-user-circle ml-2 text-primary"></i> @customerName</h5>
+                            <small><i class="fa fa-phone ml-1"></i> @customerPhone</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="group-badge">@invoiceCount عمليات صيانة</span>
+                        <i class="fa fa-chevron-down chevron-icon mr-3" id="icon-@group.Key"></i>
+                    </div>
+                </div>
+
+                <div class="invoices-container" id="container-@group.Key">
+                    <table class="inner-table text-center shadow-sm">
+                        <thead>
+                            <tr>
+                                <th>رقم العملية</th>
+                                <th>اسم الصيانة</th>
+                                <th>الفني</th>
+                                <th>المبلغ الإجمالي</th>
+                                <th>التاريخ</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var m in group)
+                            {
+
+                                var hasUnclaimedItems = m.HoldItems != null && m.HoldItems.Any(h => !h.IsDelivered);
+                                var totalAmount = (m.Items?.Sum(i => i.Price * i.Quantity) ?? 0) + m.ServicePrice;
+                                <tr class="@(hasUnclaimedItems ? "table-warning-row" : "")">
+
+                                    <td><span class="badge badge-light">#@m.Id</span>
+                                    @if (hasUnclaimedItems){
+
+                                        <i class="fa fa-exclamation-triangle text-warning shadow-sm" 
+                                             title="يوجد قطع تحت الحفظ لم تسلم" 
+                                             style="animation: blink 1.5s infinite; font-size: 1.2rem;"></i>
+                                    }
+                                    
+                                    </td>
+                                    <td class="font-weight-bold">@m.Name
+                                        @if(hasUnclaimedItems){ <small class="badge badge-warning text-dark">تحت الحفظ</small> }
+                                    </td>
+                                    <td><span class="text-info">@m.Technician?.FullName</span></td>
+                                    <td class="text-primary font-weight-bold">@totalAmount.ToString("N2") ج.م</td>
+                                    <td class="small text-muted">@m.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a class="btn btn-sm btn-outline-primary btn-action" href="@Url.Action("Details", new { id = m.Id })">
+                                                <i class="fa fa-eye"></i> عرض
+                                            </a>
+                                            <a class="btn btn-sm btn-collect btn-action" href="@Url.Action("index", "CreditCollections", new { id = m.SalesInvoiceId })">
+                                                <i class="fa fa-money-bill-wave"></i> تحصيل
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleInvoices(groupId) {
+        const container = document.getElementById('container-' + groupId);
+        const header = container.previousElementSibling;
+        const icon = document.getElementById('icon-' + groupId);
+
+        // تبديل الحالة
+        if (container.style.display === 'block') {
+            container.style.display = 'none';
+            header.classList.remove('active');
+        } else {
+            // إخفاء أي حاويات أخرى مفتوحة (اختياري - إذا كنت تريد فتح واحد فقط في كل مرة)
+            // document.querySelectorAll('.invoices-container').forEach(el => el.style.display = 'none');
+            // document.querySelectorAll('.customer-header').forEach(el => el.classList.remove('active'));
+
+            container.style.display = 'block';
+            header.classList.add('active');
+        }
+    }
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />

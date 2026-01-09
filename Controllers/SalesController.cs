@@ -31,7 +31,7 @@ namespace AutoPartsPOS.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthorizePermission("SalesInvoices_Create")]
-        public IActionResult Create(string invoiceItemsJson, bool IsCredit, int? CustomerId)
+        public IActionResult Create(SalesInvoice model, string invoiceItemsJson, bool IsCredit, int? CustomerId)
         {
             if (string.IsNullOrWhiteSpace(invoiceItemsJson))
                 return Error("لم يتم إرسال بيانات الفاتورة");
@@ -80,7 +80,10 @@ namespace AutoPartsPOS.Controllers
                         InvoiceId = invoice.Id,
                         ProductId = product.Id,
                         Quantity = i.Quantity,
-                        Price = price
+                        Price = price,
+                    Description = product.Name,
+
+                        
                     });
 
                     invoice.Total += price * i.Quantity;
@@ -100,6 +103,7 @@ namespace AutoPartsPOS.Controllers
                         TransType = "In",
                         Notes = $"فاتورة بيع رقم {invoice.Id}",
                         CustomerId =1,
+                        
                         SalesInvoiceId = invoice.Id,
                         UserId = userId.Value
                     });
@@ -116,8 +120,9 @@ namespace AutoPartsPOS.Controllers
                 _context.SaveChanges();
                 tx.Commit();
 
-                TempData["Success"] = "تمت عملية البيع بنجاح ✔";
-                return RedirectToAction("Pos");
+              
+                TempData["Success"] = "تم حفظ الصيانة وتوليد الفاتورة بنجاح ✔";
+                return RedirectToAction("Details", new { id = model.Id });
             }
             catch (Exception ex)
             {

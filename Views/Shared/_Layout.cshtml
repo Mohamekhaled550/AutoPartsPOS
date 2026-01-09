@@ -9,6 +9,7 @@
     <title>@ViewData["Title"] - لوحة التحكم</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="~/css/site1.css" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
    
@@ -80,6 +81,13 @@
             {
                 <li onclick="location.href='@Url.Action("Sales","Reports")'">
                     <span>تقارير المبيعات </span>
+                </li>
+            }
+
+               @if (permissions.Contains("Maintenance_Technician_Report"))
+            {
+                <li onclick="location.href='@Url.Action("TechnicianReport","Maintenance")'">
+                    <span>تقارير الفنيين </span>
                 </li>
             }
         </ul>
