@@ -47,10 +47,7 @@
                 <li onclick="location.href='@Url.Action("Index","Customers")'"><i class="fas fa-users"></i><span>العملاء</span></li>
             }
           
-            @if (permissions.Contains("SalesInvoices_Read"))
-            {
-                <li onclick="location.href='@Url.Action("Index","SalesInvoices")'"><i class="fas fa-file-invoice-dollar"></i><span>فواتير المبيعات</span></li>
-            }
+          
         
             @if (permissions.Contains("Returns_Read"))
             {
@@ -110,6 +107,11 @@
             <li onclick="location.href='@Url.Action("CustomerStatement","Reports")'">
                 <span>عرض الحسابات</span>
             </li>
+ <li onclick="location.href='@Url.Action("Index","Safe")'">
+                <span>الخزنة </span>
+            </li>
+
+
             }
             
             @if (permissions.Contains("CashTransactions_Create") && permissions.Contains("SalesInvoices_Read"))
@@ -141,22 +143,9 @@
                 </li>
             }
 
-            @if (permissions.Contains("Maintenance_View"))
-            {
-                <li onclick="location.href='@Url.Action("Index","Maintenance")'">
-                    <span>الصيانة الداخلية</span>
-                </li>
-            }
-
-            @if (permissions.Contains("Maintenance_External"))
-            {
-                <li onclick="location.href='@Url.Action("External","Maintenance")'">
-                    <span>الصيانة الخارجية (زيارات)</span>
-                </li>
-            }
 
             <li onclick="location.href='@Url.Action("Index","Maintenance")'">
-                <span>كل الصيانات</span>
+                <span>فواتير الصيانات</span>
             </li>
 
         </ul>

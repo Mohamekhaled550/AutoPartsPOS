@@ -31,6 +31,8 @@ namespace AutoPartsPOS.Controllers
                 .Include(m => m.Customer)
                 .Include(m => m.Technician)
                 .Include(m => m.Items)         // ده السطر اللي ناقص! تحميل قطع الغيار
+                .Include(m => m.HoldItems)
+
                 .OrderByDescending(m => m.CreatedAt)
                 .ToList();
             return View(maintenances);
@@ -274,6 +276,23 @@ public IActionResult TechnicianReport(int? technicianId, int? month, int? year, 
 }
 
 
+
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+[AuthorizePermission("Maintenance_View")]
+
+public async Task<IActionResult> MarkAsDelivered(int holdItemId, int maintenanceId)
+{
+    var holdItem = await _context.MaintenanceHoldItems.FindAsync(holdItemId);
+    if (holdItem != null)
+    {
+        holdItem.IsDelivered = true;
+        await _context.SaveChangesAsync();
+        TempData["Success"] = "تم تحديث حالة القطعة إلى تم التسليم بنجاح.";
+    }
+    return RedirectToAction(nameof(Details), new { id = maintenanceId });
+}
         // DTO داخلي لاستقبال البيانات من الـ View
         public class MaintenanceItemDto
         {

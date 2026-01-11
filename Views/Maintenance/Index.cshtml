@@ -59,6 +59,16 @@
 
     .chevron-icon { transition: transform 0.3s ease; color: #cbd5e1; }
     .active .chevron-icon { transform: rotate(180deg); color: #1e3a8a; }
+
+    .table-warning-row {
+        background-color: #fffbeb !important; /* لون أصفر خفيف جداً للصف */
+        border-right: 4px solid #f59e0b !important;
+    }
+    @@keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.3; }
+        100% { opacity: 1; }
+    }
 </style>
 
 <div class="container-fluid">

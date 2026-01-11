@@ -7,11 +7,7 @@
 
 <style>
     /* تنسيقات الشاشة الأساسية */
-    body {
-        background-color: #f4f7f6;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
+   
     .card {
         border-radius: 20px !important;
         border: none !important;
@@ -219,21 +215,44 @@
                         </p>
                     </div>
 
-                    @if (Model.HoldItems != null && Model.HoldItems.Any())
+                 @if (Model.HoldItems != null && Model.HoldItems.Any())
+{
+    <div class="hold-items-box mt-4">
+        <h6 class="font-weight-bold text-dark mb-3">
+            <i class="fa fa-archive"></i> الأمانات والقطع المحتجزة:
+        </h6>
+        @foreach (var hold in Model.HoldItems)
+        {
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <i class="fa fa-caret-left text-primary"></i> 
+                    <span class="font-weight-bold">@hold.ItemName</span>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    @if (!hold.IsDelivered)
                     {
-                        <div class="hold-items-box">
-                            <h6 class="font-weight-bold text-dark mb-3"><i class="fa fa-archive"></i> الأمانات والقطع المحتجزة تحت الحفظ:</h6>
-                            @foreach (var hold in Model.HoldItems)
-                            {
-                                <div class="hold-item-entry">
-                                    <span class="font-weight-bold"><i class="fa fa-caret-left"></i> @hold.ItemName</span>
-                                    <span class="badge @(hold.IsDelivered ? "badge-success" : "badge-danger")">
-                                        @(hold.IsDelivered ? "تم التسليم للعميل" : "لا تزال بالمخزن")
-                                    </span>
-                                </div>
-                            }
-                        </div>
+                        <span class="badge badge-danger ml-2 p-2">تحت الحفظ</span>
+                        <form asp-action="MarkAsDelivered" asp-controller="Maintenance" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="holdItemId" value="@hold.Id" />
+                            <input type="hidden" name="maintenanceId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-sm btn-success shadow-sm">
+                                <i class="fa fa-check"></i> تم تسليمها الآن
+                            </button>
+                        </form>
                     }
+                    else
+                    {
+                        <span class="badge badge-success p-2">
+                            <i class="fa fa-check-double"></i> تم التسليم للعميل
+                        </span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
                 </div>
                 
                 <div class="col-md-5">

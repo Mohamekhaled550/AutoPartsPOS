@@ -1,0 +1,234 @@
+<style>
+    :root {
+        /* ألوان Gradients قوية وصريحة للتباين العالي */
+        --success-gradient: linear-gradient(135deg, #059669 0%, #064e3b 100%); /* أخضر غامق جداً */
+        --danger-gradient: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%);  /* أحمر دموي واضخ */
+        --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); /* أزرق ملكي صريح */
+        
+        --glass-bg: rgba(255, 255, 255, 0.98);
+        --text-main: #000000;
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* كروت الإحصائيات - تعديل الحجم والخط */
+    .stat-card {
+        border: none;
+        border-radius: 24px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        min-height: 160px; /* زيادة الارتفاع ليتناسب مع الخط الكبير */
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(45deg);
+        z-index: -1;
+    }
+
+    .bg-in { background: var(--success-gradient); }
+    .bg-out { background: var(--danger-gradient); }
+    .bg-bal { background: var(--primary-gradient); }
+
+    .stat-card h6 {
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 15px;
+    }
+
+    /* الأرقام داخل الكروت - تعديل جوهري */
+    .stat-card h3 {
+        font-weight: 900 !important; /* خط سميك جداً */
+        font-size: 2.8rem !important; /* حجم كبير جداً وواضح */
+        color: #ffffff !important;   /* أبيض ناصع */
+        text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3); /* ظل لبروز الرقم */
+        letter-spacing: -1px;
+        margin: 0;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* تحسين أرقام الجدول */
+    .indicator-in { 
+        color: #064e3b !important; 
+        background: #d1fae5; 
+        padding: 10px 20px; 
+        border-radius: 12px;
+        font-weight: 900;
+        font-size: 1.2rem;
+        display: inline-block;
+        min-width: 140px;
+        border: 2px solid #10b981;
+    }
+
+    .indicator-out { 
+        color: #7f1d1d !important; 
+        background: #fee2e2; 
+        padding: 10px 20px; 
+        border-radius: 12px;
+        font-weight: 900;
+        font-size: 1.2rem;
+        display: inline-block;
+        min-width: 140px;
+        border: 2px solid #ef4444;
+    }
+
+    .text-muted-dark {
+        color: #000000 !important; 
+        font-weight: 700;
+    }
+
+    /* تنسيق الجدول والحاويات */
+    .withdrawal-section {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 24px;
+        padding: 25px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .modern-table {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        width: 100%;
+    }
+
+    .modern-table tbody tr {
+        background-color: #f8fafc;
+        transition: all 0.2s;
+    }
+
+    .modern-table td {
+        padding: 20px;
+        border: none;
+        vertical-align: middle;
+        color: #000000;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h2 class="fw-bold m-0"><i class="fas fa-vault text-primary me-2"></i> إدارة الخزنة المركزية</h2>
+        <span class="badge bg-dark text-white shadow-sm p-3 px-4 border-0 rounded-pill">
+            <i class="far fa-calendar-alt me-2"></i> @DateTime.Now.ToString("yyyy-MM-dd")
+        </span>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card stat-card bg-in text-white shadow-lg">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-arrow-circle-down float-end opacity-25 fa-3x" style="position:absolute; right:20px; top:20px;"></i>
+                    <h6>إجمالي الوارد</h6>
+                    <h3>@ViewBag.TotalIn.ToString("N2") <small style="font-size: 0.4em">ج.م</small></h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card bg-out text-white shadow-lg">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-arrow-circle-up float-end opacity-25 fa-3x" style="position:absolute; right:20px; top:20px;"></i>
+                    <h6>إجمالي المسحوبات</h6>
+                    <h3>@ViewBag.TotalOut.ToString("N2") <small style="font-size: 0.4em">ج.م</small></h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card bg-bal text-white shadow-lg">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-hand-holding-usd float-end opacity-25 fa-3x" style="position:absolute; right:20px; top:20px;"></i>
+                    <h6>الرصيد الحالي</h6>
+                    <h3>@ViewBag.Balance.ToString("N2") <small style="font-size: 0.4em">ج.م</small></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card withdrawal-section mb-5 border-0">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="fw-bold text-dark"><i class="fas fa-minus-circle text-danger me-2"></i> تسجيل سحب / مصروفات</h5>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Withdraw" method="post" class="row g-4">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-dark">المبلغ</label>
+                    <input type="number" name="amount" step="0.01" class="form-control form-control-lg border-2 shadow-sm" style="border-radius:15px" placeholder="0.00" required />
+                </div>
+                <div class="col-md-7">
+                    <label class="form-label fw-bold text-dark">البيان (سبب السحب)</label>
+                    <input type="text" name="notes" class="form-control form-control-lg border-2 shadow-sm" style="border-radius:15px" placeholder="مثلاً: سحب شخصي، إيجار..." required />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-danger w-100 shadow-lg fw-bold p-3" style="border-radius:15px; font-size:1.1rem">
+                        تأكيد السحب
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-container shadow-sm border">
+        <h5 class="mb-4 fw-bold px-2 text-dark border-bottom pb-3"><i class="fas fa-history me-2 text-primary"></i> آخر التحركات المالية</h5>
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr class="text-dark">
+                        <th class="text-center">التاريخ والوقت</th>
+                        <th>تفاصيل الحركة</th>
+                        <th class="text-center">الوارد (+)</th>
+                        <th class="text-center">الصادر (-)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                <div class="text-muted-dark">@item.TransDate.ToString("yyyy-MM-dd")</div>
+                                <div class="badge bg-light text-dark border">@item.TransDate.ToString("HH:mm")</div>
+                            </td>
+                            <td>
+                                <div class="fw-bold" style="font-size: 1.1rem">@item.Notes</div>
+                                <small class="text-secondary">@(item.TransType == "In" ? "إيداع للخزينة" : "سحب نقدي")</small>
+                            </td>
+                            <td class="text-center">
+                                @if(item.TransType == "In") {
+                                    <span class="indicator-in">+ @item.Amount.ToString("N2")</span>
+                                } else {
+                                    <span class="fw-bold text-light">---</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                 @if(item.TransType == "Out") {
+                                    <span class="indicator-out">- @item.Amount.ToString("N2")</span>
+                                } else {
+                                    <span class="fw-bold text-light">---</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

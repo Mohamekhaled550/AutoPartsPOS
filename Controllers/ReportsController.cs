@@ -156,6 +156,9 @@ public IActionResult CustomerStatementView(int customerId)
         {
             s.Id,
             s.InvoiceDate,
+            // تغيير MaintenanceType إلى Type.Name أو Type.ToString() حسب الموديل عندك
+            OperationName = s.Maintenance != null ? s.Maintenance.Name : "فاتورة مبيعات",
+            MaintenanceTypeName = s.Maintenance != null ? s.Maintenance.Type.ToString() : "عام", 
             s.Total,
             s.Paid,
             Remaining = s.Total - s.Paid
@@ -177,9 +180,10 @@ public IActionResult CustomerStatementView(int customerId)
     ViewBag.Invoices = invoices;
     ViewBag.Collections = collections;
 
-    ViewBag.TotalInvoices = invoices.Sum(x => x.Total);
-    ViewBag.TotalCollections = collections.Sum(x => x.Amount);
-    ViewBag.FinalBalance = ViewBag.TotalInvoices - ViewBag.TotalCollections;
+    // تأكد من عمل Cast لـ decimal لضمان دقة الحسابات
+    ViewBag.TotalInvoices = invoices.Sum(x => (decimal)x.Total);
+    ViewBag.TotalCollections = collections.Sum(x => (decimal)x.Amount);
+    ViewBag.FinalBalance = (decimal)ViewBag.TotalInvoices - (decimal)ViewBag.TotalCollections;
 
     return View("CustomerStatement");
 }
