@@ -61,6 +61,8 @@ public IActionResult GetCustomerHoldItems(int customerId)
     return Json(items);
 }
 
+
+
         // 3. الأكشن الأساسي لحفظ الصيانة وتحويلها لفاتورة
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -293,6 +295,11 @@ public async Task<IActionResult> MarkAsDelivered(int holdItemId, int maintenance
     }
     return RedirectToAction(nameof(Details), new { id = maintenanceId });
 }
+
+
+
+
+
         // DTO داخلي لاستقبال البيانات من الـ View
         public class MaintenanceItemDto
         {

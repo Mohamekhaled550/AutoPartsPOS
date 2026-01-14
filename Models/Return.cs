@@ -17,6 +17,10 @@ namespace AutoPartsPOS.Models
     public DateTime ReturnDate { get; set; }
     public decimal Total { get; set; }
 
+    public decimal ReturnedServicePrice { get; set; }
+
+    public string Reason { get; set; } // ضروري جداً للأدمن يعرف ليه العملية رجعت
+
     // Navigation
     public SalesInvoice SalesInvoice { get; set; }
     public Customer Customer { get; set; }

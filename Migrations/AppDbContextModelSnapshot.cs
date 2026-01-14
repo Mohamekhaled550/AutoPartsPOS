@@ -191,7 +191,6 @@ namespace AutoPartsPOS.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("ProductId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -265,11 +264,18 @@ namespace AutoPartsPOS.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("ReturnDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("ReturnType")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("ReturnedServicePrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("SalesInvoiceId")
                         .IsRequired()
@@ -403,7 +409,6 @@ namespace AutoPartsPOS.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("ProductId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -532,8 +537,7 @@ namespace AutoPartsPOS.Migrations
                     b.HasOne("AutoPartsPOS.Models.Product", "Product")
                         .WithMany("MaintenanceItems")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Maintenance");
 
@@ -625,8 +629,7 @@ namespace AutoPartsPOS.Migrations
                     b.HasOne("AutoPartsPOS.Models.Product", "Product")
                         .WithMany("SalesInvoiceItems")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Product");
 

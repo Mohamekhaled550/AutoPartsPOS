@@ -1,0 +1,172 @@
+@model IEnumerable<AutoPartsPOS.Models.Return>
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="m-0">عملية مرتجع جديدة</h5>
+        </div>
+        <div class="card-body bg-light text-end">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="fw-bold">1. اختر العميل:</label>
+                    <select id="customerSelect" class="form-select" onchange="loadInvoices()">
+                        <option value="">-- اختر من العملاء --</option>
+                        @foreach (var cust in ViewBag.Customers)
+                        {
+                            <option value="@cust.Id">@cust.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="fw-bold">2. اختر الفاتورة المراد إرجاعها:</label>
+                    <select id="invoiceSelect" class="form-select" onchange="loadItems()" disabled>
+                        <option value="">-- اختر الفاتورة --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="returnDetailsArea" class="d-none mt-4 border-top pt-3 bg-white p-3 rounded shadow-sm">
+                <form asp-action="CreateReturn" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="invoiceId" id="targetInvoiceId" />
+                    
+                    <h6 class="text-danger fw-bold mb-3 border-bottom pb-2">تحديد الكميات المرتجعة:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover text-center">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th>الصنف</th>
+                                    <th>الكمية المباعة</th>
+                                    <th>إرجاع كمية</th>
+                                    <th>السعر</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="row align-items-end mt-3 g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">إرجاع مبلغ مصنعية يد (اختياري):</label>
+                            <input type="number" name="returnServiceAmount" class="form-control" value="0" step="0.01">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">سبب الإرجاع:</label>
+                            <input type="text" name="reason" class="form-control" required placeholder="مثال: القطعة لا تعمل">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-danger w-100 fw-bold">إتمام المرتجع وتعديل الخزنة والمخزن</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-secondary text-white">
+            <h6 class="m-0">سجل المرتجعات المالي والمخزني</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover text-center m-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>رقم المرتجع</th>
+                        <th>التاريخ</th>
+                        <th>الفاتورة الأصلية</th>
+                        <th>العميل</th>
+                        <th>المبلغ المسترد</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.ReturnDate.ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>#@item.SalesInvoiceId</td>
+                            <td>@(item.Customer?.Name ?? "نقدي")</td>
+                            <td class="text-danger fw-bold">@item.Total.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadInvoices() {
+            var custId = $('#customerSelect').val();
+            var invoiceSelect = $('#invoiceSelect');
+            
+            if (!custId) {
+                invoiceSelect.prop('disabled', true).html('<option value="">-- اختر الفاتورة --</option>');
+                $('#returnDetailsArea').addClass('d-none');
+                return;
+            }
+
+            // الرابط الصحيح باستخدام Url.Action
+            var url = '@Url.Action("GetInvoicesByCustomer", "Returns")';
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: { customerId: custId },
+                success: function (data) {
+                    var options = '<option value="">-- اختر الفاتورة --</option>';
+                    if (data && data.length > 0) {
+                        data.forEach(function(inv) {
+                            options += `<option value="${inv.id}">فاتورة #${inv.id} - بتاريخ ${inv.date} (إجمالي: ${inv.total})</option>`;
+                        });
+                        invoiceSelect.prop('disabled', false);
+                    } else {
+                        options = '<option value="">لا توجد فواتير سابقة لهذا العميل</option>';
+                        invoiceSelect.prop('disabled', true);
+                    }
+                    invoiceSelect.html(options);
+                    $('#returnDetailsArea').addClass('d-none');
+                },
+                error: function() {
+                    alert("خطأ في الاتصال بالسيرفر أثناء جلب الفواتير");
+                }
+            });
+        }
+
+        function loadItems() {
+            var invId = $('#invoiceSelect').val();
+            if (!invId) {
+                $('#returnDetailsArea').addClass('d-none');
+                return;
+            }
+
+            $('#targetInvoiceId').val(invId);
+            var url = '@Url.Action("GetInvoiceItems", "Returns")';
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: { id: invId },
+                success: function (data) {
+                    var html = '';
+                    data.forEach(function(item, index) {
+                        if (item.productId != null) {
+                            html += `<tr>
+                                <td>${item.description}</td>
+                                <td><span class="badge bg-info text-dark">${item.quantity}</span></td>
+                                <td>
+                                    <input type="hidden" name="items[${index}].ProductId" value="${item.productId}">
+                                    <input type="hidden" name="items[${index}].Price" value="${item.price}">
+                                    <input type="number" name="items[${index}].Quantity" class="form-control form-control-sm border-danger text-center mx-auto" style="width:80px" value="0" max="${item.quantity}" min="0">
+                                </td>
+                                <td>${item.price.toFixed(2)}</td>
+                            </tr>`;
+                        }
+                    });
+                    $('#itemsTableBody').html(html);
+                    $('#returnDetailsArea').removeClass('d-none');
+                }
+            });
+        }
+    </script>
+}
