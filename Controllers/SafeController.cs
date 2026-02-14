@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using AutoPartsPOS.Data;
+
 using AutoPartsPOS.Models;
 using AutoPartsPOS.Filters;
 using System;
@@ -18,7 +19,8 @@ namespace AutoPartsPOS.Controllers
         }
 
         // عرض سجل الخزنة والرصيد الحالي
-        [AuthorizePermission("CashTransactions_Read")]
+                [AuthorizePermission("Safe_Read")]
+
         public IActionResult Index()
         {
             var transactions = _context.CashTransactions
@@ -39,7 +41,7 @@ namespace AutoPartsPOS.Controllers
         // عملية السحب النقدي
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthorizePermission("CashTransactions_Create")]
+                [AuthorizePermission("Safe_Read")]
         public IActionResult Withdraw(decimal amount, string notes)
         {
             if (amount <= 0)

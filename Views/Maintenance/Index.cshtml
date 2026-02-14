@@ -10,7 +10,8 @@
 }
 
 <style>
-    body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+
+
     .main-card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 25px; margin-top: 20px; }
     
     /* سطر العميل (الأب) */
@@ -147,6 +148,14 @@
                                             <a class="btn btn-sm btn-collect btn-action" href="@Url.Action("index", "CreditCollections", new { id = m.SalesInvoiceId })">
                                                 <i class="fa fa-money-bill-wave"></i> تحصيل
                                             </a>
+                                                @if (User.IsInRole("Admin")){
+                                             <form id="delete-form-@m.Id" asp-action="DeleteMaintenance" asp-route-id="@m.Id" method="post" style="display:inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="button" class="btn btn-sm btn-danger btn-action" onclick="runReturnThenDelete(@m.Id)">
+                                                    <i class="fa fa-trash"></i> حذف نهائي ومرتجع
+                                                </button>
+                                            </form>
+                                            }
                                         </div>
                                     </td>
                                 </tr>
@@ -170,16 +179,45 @@
         // تبديل الحالة
         if (container.style.display === 'block') {
             container.style.display = 'none';
-            header.classList.remove('active');
         } else {
             // إخفاء أي حاويات أخرى مفتوحة (اختياري - إذا كنت تريد فتح واحد فقط في كل مرة)
             // document.querySelectorAll('.invoices-container').forEach(el => el.style.display = 'none');
             // document.querySelectorAll('.customer-header').forEach(el => el.classList.remove('active'));
 
             container.style.display = 'block';
+
             header.classList.add('active');
         }
     }
 </script>
+<script>
+    async function runReturnThenDelete(id) {
+        if (!confirm('هل أنت متأكد؟ سيتم استرداد قطع الغيار للمخزن وحذف السجل نهائياً.')) return;
+
+        // الحصول على التوكن للحماية
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        try {
+            // 1. تنفيذ أكشن المرتجع أولاً عبر Fetch
+            let response = await fetch(`/Maintenance/ReturnMaintenance/${id}`, {
+                method: 'POST',
+                headers: {
+                    "RequestVerificationToken": token,
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            // 2. بعد اكتمال المرتجع (سواء نجح أو فشل)، نقوم بتنفيذ فورم الحذف
+            // ملاحظة: حتى لو المرتجع أعاد Redirect، الـ fetch سيتعامل معه ثم نكمل
+            document.getElementById('delete-form-' + id).submit();
+            
+        } catch (error) {
+            console.error('Error:', error);
+            // في حالة حدوث خطأ تقني، ننفذ الحذف مباشرة لضمان عدم تعليق المستخدم
+            document.getElementById('delete-form-' + id).submit();
+        }
+    }
+</script>
+
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />

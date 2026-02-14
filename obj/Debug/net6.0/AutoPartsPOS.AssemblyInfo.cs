@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AutoPartsPOS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+75981d92ed479b4763454ae42bf7fbb0dec90f7c")]
 [assembly: System.Reflection.AssemblyProductAttribute("AutoPartsPOS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AutoPartsPOS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

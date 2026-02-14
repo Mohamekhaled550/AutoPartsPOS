@@ -38,6 +38,209 @@ namespace AutoPartsPOS.Controllers
             return View(maintenances);
         }
 
+
+
+
+
+
+// --- أكشن المرتجع (إرجاع قطع الغيار للمخزن وإلغاء المالية) ---
+
+[HttpPost]
+
+[ValidateAntiForgeryToken]
+
+[AuthorizePermission("Maintenance_Edit")]
+
+public async Task<IActionResult> ReturnMaintenance(int id)
+
+{
+
+using var tx = await _context.Database.BeginTransactionAsync();
+
+try
+
+{
+
+var m = await _context.Maintenances
+
+.Include(x => x.Items)
+
+.Include(x => x.Customer)
+
+.Include(x => x.SalesInvoice)
+
+.FirstOrDefaultAsync(x => x.Id == id);
+
+
+
+if (m == null) return NotFound();
+
+
+
+// 1. إعادة قطع الغيار للمخزن
+
+foreach (var item in m.Items)
+
+{
+
+var product = await _context.Products.FindAsync(item.ProductId);
+
+if (product != null) product.Quantity += item.Quantity;
+
+}
+
+
+
+// 2. معالجة المالية (خصم من مديونية العميل لو آجل)
+
+if (m.SalesInvoice != null){
+if (m.SalesInvoice.IsCredit && m.Customer != null)
+{
+    decimal totalToReturn = m.SalesInvoice.Total;
+
+    // --- المرحلة 1: الخصم من رصيد العميل العام ---
+    if (m.Customer.Balance > 0)
+    {
+        if (m.Customer.Balance >= totalToReturn)
+        {
+            m.Customer.Balance -= totalToReturn;
+            totalToReturn = 0;
+        }
+        else
+        {
+            totalToReturn -= m.Customer.Balance;
+            m.Customer.Balance = 0;
+        }
+        _context.Customers.Update(m.Customer);
+    }
+
+    // --- المرحلة 2: الخصم من الفواتير الآجل التي لم تُحصل بعد (التحصيلات) ---
+    if (totalToReturn > 0)
+    {
+        // جلب الفواتير الآجل الأخرى لنفس العميل والتي عليها مديونية (غير الفاتورة الحالية)
+        var otherPendingInvoices = await _context.SalesInvoices
+            .Where(s => s.CustomerId == m.CustomerId && s.IsCredit && s.Total > s.Paid && s.Id == m.SalesInvoiceId && s.Id != m.SalesInvoiceId)
+            .OrderBy(s => s.InvoiceDate) // نبدأ بالأقدم
+            .ToListAsync();
+
+        foreach (var inv in otherPendingInvoices)
+        {
+            if (totalToReturn <= 0) break;
+
+            decimal remainingOnInvoice = inv.Total - inv.Paid;
+
+            if (remainingOnInvoice >= totalToReturn)
+            {
+                inv.Paid += totalToReturn; // نعتبر المرتجع كأنه "دفع" جزء من الفاتورة
+                totalToReturn = 0;
+            }
+            else
+            {
+                totalToReturn -= remainingOnInvoice;
+                inv.Paid = inv.Total; // تسديد الفاتورة بالكامل
+            }
+            _context.SalesInvoices.Update(inv);
+        }
+    }
+
+    // --- المرحلة 3: صرف الباقي نقداً من الخزنة ---
+    if (totalToReturn > 0)
+    {
+        var userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+        var cashOut = new CashTransaction
+        {
+            TransDate = DateTime.Now,
+            Amount = totalToReturn,
+            TransType = "Out",
+            Notes = $"رد متبقي مرتجع صيانة #{m.Id} بعد تسوية الرصيد والتحصيلات",
+            UserId = userId,
+            CustomerId = m.CustomerId
+        };
+        _context.CashTransactions.Add(cashOut);
+    }
+}
+
+if (!m.SalesInvoice.IsCredit) // لو كانت الفاتورة نقدي
+{
+    var userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+    
+    var cashOut = new CashTransaction
+    {
+        TransDate = DateTime.Now,
+        Amount = m.SalesInvoice.Total,
+        TransType = "Out", // صادر من الخزنة لرد المبلغ للعميل
+        Notes = $"مرتجع نقدي لعملية صيانة محذوفة #{m.Id}",
+        UserId = userId,
+        CustomerId = m.CustomerId
+    };
+    
+    _context.CashTransactions.Add(cashOut); // هذا السطر هو المسؤول عن ظهور الحركة في صفحة الخزنة
+}
+// ملاحظة: لو نقدي يفضل عمل CashTransaction صادر (Out) لإثبات المرتجع
+
+}
+
+
+
+m.Status = MaintenanceStatus.Cancelled; // تغيير الحالة لملغي/مرتجع
+
+await _context.SaveChangesAsync();
+
+await tx.CommitAsync();
+
+
+
+TempData["Success"] = "تم عمل مرتجع للعملية وإعادة القطع للمخزن بنجاح.";
+
+return RedirectToAction(nameof(Index));
+
+}
+
+catch (Exception ex)
+
+{
+
+await tx.RollbackAsync();
+
+TempData["Error"] = "خطأ في المرتجع: " + ex.Message;
+
+return RedirectToAction(nameof(Index));
+
+}
+
+}
+
+
+
+// --- أكشن الحذف النهائي ---
+
+[HttpPost]
+
+[ValidateAntiForgeryToken]
+
+[AuthorizePermission("Maintenance_Edit")]
+
+public async Task<IActionResult> DeleteMaintenance(int id)
+
+{
+
+var m = await _context.Maintenances.FindAsync(id);
+
+if (m != null)
+
+{
+
+_context.Maintenances.Remove(m);
+
+await _context.SaveChangesAsync();
+
+TempData["Success"] = "تم حذف السجل بنجاح.";
+
+}
+
+return RedirectToAction(nameof(Index));
+
+} 
         // 2. صفحة إنشاء صيانة جديدة
         [AuthorizePermission("Maintenance_Create")]
         public IActionResult Create()

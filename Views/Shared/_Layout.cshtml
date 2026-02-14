@@ -107,12 +107,15 @@
             <li onclick="location.href='@Url.Action("CustomerStatement","Reports")'">
                 <span>عرض الحسابات</span>
             </li>
- <li onclick="location.href='@Url.Action("Index","Safe")'">
-                <span>الخزنة </span>
-            </li>
-
+ 
 
             }
+  @if (permissions.Contains("Safe_Read")){
+            <li onclick="location.href='@Url.Action("Index","Safe")'">
+                <span>الخزنة </span>
+            </li>
+            
+}
             
             @if (permissions.Contains("CashTransactions_Create") && permissions.Contains("SalesInvoices_Read"))
             {

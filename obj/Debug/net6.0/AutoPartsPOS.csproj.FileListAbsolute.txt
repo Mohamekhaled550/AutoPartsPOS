@@ -69,8 +69,3 @@ C:\Users\KIMO STORE\AutoPartsPOS\obj\Debug\net6.0\refint\AutoPartsPOS.dll
 C:\Users\KIMO STORE\AutoPartsPOS\obj\Debug\net6.0\AutoPartsPOS.pdb
 C:\Users\KIMO STORE\AutoPartsPOS\obj\Debug\net6.0\AutoPartsPOS.genruntimeconfig.cache
 C:\Users\KIMO STORE\AutoPartsPOS\obj\Debug\net6.0\ref\AutoPartsPOS.dll
-C:\Users\KIMO STORE\AutoPartsPOS\bin\Debug\net6.0\publish\web.config
-C:\Users\KIMO STORE\AutoPartsPOS\bin\Debug\net6.0\publish\appsettings.Development.json
-C:\Users\KIMO STORE\AutoPartsPOS\bin\Debug\net6.0\publish\appsettings.json
-C:\Users\KIMO STORE\AutoPartsPOS\bin\Debug\net6.0\publish\AutoPartsPOS.deps.json
-C:\Users\KIMO STORE\AutoPartsPOS\bin\Debug\net6.0\publish\AutoPartsPOS.runtimeconfig.json

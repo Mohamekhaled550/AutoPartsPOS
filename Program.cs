@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 var culture = new CultureInfo("en-US");
@@ -62,10 +63,31 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // =========================
-// 5️⃣ Routing
+// 5️⃣ Routing & Open Browser
 // =========================
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
+
+// كود لفتح المتصفح تلقائياً
+if (app.Environment.IsProduction()) // يفضل تشغيله في نسخة العميل فقط
+{
+    var url = "http://localhost:5000"; // أو الرابط اللي شغال عندك
+    app.Lifetime.ApplicationStarted.Register(() =>
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Could not open browser: " + ex.Message);
+        }
+    });
+}
 
 app.Run();
