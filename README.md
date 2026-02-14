@@ -1,99 +1,278 @@
-🛠️ AutoParts & Maintenance Management System (POS)
+# 🛠️ AutoParts & Maintenance Management System (POS)
 
-A robust, enterprise-grade Point of Sale and Maintenance Tracking System specifically designed for automotive service centers and spare parts retailers. Built with ASP.NET Core 6 MVC, this system ensures precision in inventory management and excellence in customer service.
+![Framework](https://img.shields.io/badge/.NET-6.0-purple.svg)  
+![Database](https://img.shields.io/badge/SQL_Server-2019-red.svg)  
+![Architecture](https://img.shields.io/badge/Architecture-Clean_Architecture-blue.svg)  
+![Status](https://img.shields.io/badge/Status-Production_Ready-success.svg)
 
-🔄 System Workflow & Logic (The Process)
-This diagram illustrates how the system handles a typical maintenance job and its financial impact:
+---
+
+## 📌 Overview
+
+A **Professional Enterprise-Grade Point of Sale & Maintenance Management System** designed specifically for:
+
+- Automotive Service Centers  
+- Spare Parts Retailers  
+- Car Maintenance Workshops  
+
+The system provides **real-time inventory tracking**, **maintenance lifecycle management**, and **accurate financial accounting** — all in one integrated platform.
+
+---
+
+## 🧰 Built Using
+
+- ASP.NET Core 6 MVC  
+- Entity Framework Core  
+- SQL Server  
+- Razor Views  
+- Bootstrap 5  
+
+---
+
+## 🎯 Project Goals
+
+✔ Automate maintenance workflow  
+✔ Prevent inventory errors  
+✔ Provide accurate accounting & invoicing  
+✔ Improve workshop productivity  
+✔ Deliver enterprise-level reliability  
+
+---
+
+## 🔄 System Workflow
+
+```mermaid
 graph TD
     A[Customer Arrival] --> B{Vehicle Registered?}
-    B -- No --> C[Register Car & Owner]
+    B -- No --> C[Register Car and Owner]
     B -- Yes --> D[Create Maintenance Ticket]
     D --> E[Technician Assessment]
-    E --> F[Assign Spare Parts from Inventory]
+    E --> F[Assign Spare Parts]
     F --> G{Stock Check}
-    G -- Available --> H[Deduct Stock & Apply to Ticket]
+    G -- Available --> H[Deduct Stock and Apply]
     G -- Out of Stock --> I[Generate Purchase Order]
     H --> J[Complete Repair]
     J --> K[Generate Final Invoice]
-    K --> L[Post Financial Record to Accounts]
+    K --> L[Post to Accounts]
     L --> M[Close Ticket]
+```
 
+---
 
-    🧠 Logic Architecture:
-Inventory-Maintenance Linking: When a part is added to a job, the system automatically checks the StockQuantity. It prevents closing a ticket if parts are not available.
+## 🧠 Core Business Logic
 
-Financial Integrity: Invoices are calculated dynamically: Total = (Sum of Parts Price) + (Labor/Workmanship Fees) - (Discounts).
+### 📦 Inventory Protection
+- Automatic stock validation  
+- Prevent ticket closure if stock is insufficient  
 
-Data Persistence: Uses Entity Framework Core with Transactional logic to ensure that if a payment fails, the stock is not deducted.
+### 💰 Dynamic Invoice Calculation
 
-🌟 Key Features & Modules
-🚘 Maintenance & Vehicle Management
-Vehicle Lifecycle Tracking: Monitor service history by VIN or License Plate.
+```
+Total Invoice =
+(Spare Parts Total)
++ Workmanship Fees
+- Discounts
+```
 
-Maintenance Logs: Detailed records of repairs and mechanic assignments.
+### 🔒 Transaction Safety
+- EF Core Transactions  
+- Stock deducted only after payment is saved successfully  
 
-Status Tracking: Real-time updates from "Pending" to "Completed."
+---
 
-📦 Inventory & Warehouse Control
-Real-time Stock Tracking: Automatic deduction of parts upon sale.
+## 🌟 Key Features
 
-Low Stock Alerts: Notifications for critical parts reordering.
+---
 
-Categorization: Organize parts by brand and model compatibility.
+### 🚘 Maintenance & Vehicle Management
 
-💰 Accounting & POS
-Dynamic Invoicing: Professional PDF-ready invoices.
+- Full Maintenance Lifecycle Tracking  
+- Vehicle History via VIN or License Plate  
+- Maintenance Logs  
+- Real-Time Status Tracking  
 
-Session Management: Secure user sessions for cashiers and admins.
+Statuses:
+- Pending  
+- In Progress  
+- Waiting Parts  
+- Ready for Pickup  
+- Completed  
 
-Profit Reporting: Daily/Monthly financial summaries.
+---
 
-🛠️ Installation & Setup Guide
+### 📦 Inventory & Warehouse Control
 
-1. Clone the Repository
-git clone https://github.com/yourusername/AutoPartsPOS.git
+- Real-Time Stock Updates  
+- Automatic Deduction After Sales  
+- Low Stock Alerts  
+- Smart Filtering  
+
+Filter By:
+- Brand  
+- Model  
+- Part Type  
+
+---
+
+### 💰 Accounting & POS
+
+- Professional Invoices  
+- PDF Ready Printing  
+- Profit Reports  
+- Secure User Sessions  
+
+---
+
+## 🏗️ System Architecture
+
+- Clean Architecture  
+- Repository Pattern  
+- Service Layer Pattern  
+- Dependency Injection  
+- EF Core  
+
+---
+
+## ⚙️ Installation Guide
+
+---
+
+### 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/Mohamekhaled550/AutoPartsPOS.git
 cd AutoPartsPOS
+```
 
-2. Install Dependencies (NuGet Packages)
+---
+
+### 2️⃣ Install Dependencies
+
+```bash
+dotnet restore
+```
+
+OR
+
+```bash
 dotnet add package Microsoft.EntityFrameworkCore.SqlServer
 dotnet add package Microsoft.EntityFrameworkCore.Design
 dotnet add package Microsoft.EntityFrameworkCore.Tools
+```
 
-3. Database Initialization
-Open SSMS and connect to .\SQLEXPRESS.
+---
 
-Right-click Databases > Restore Database.
+### 3️⃣ Database Setup
 
-Select the provided .bak file.
+#### Restore Backup
 
-Verify the connection string in appsettings.json.
+1. Open SQL Server Management Studio  
+2. Connect to:
 
-📦 Deployment (Publishing)
-To create a standalone executable for the client:
+```
+.\SQLEXPRESS
+```
+
+3. Restore Database from project `.bak` file  
+4. Update connection string inside:
+
+```
+appsettings.json
+```
+
+---
+
+### 4️⃣ Run Project
+
+```bash
+dotnet run
+```
+
+---
+
+## 🚀 Deployment
+
+### Publish Standalone EXE
+
+```bash
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+```
 
-📂 Project Structure
-/Controllers: Business logic (Inventory, Maintenance, Accounts).
+Output Path:
 
-/Data: Database context and EF Core configurations.
+```
+/bin/Release/net6.0/win-x64/publish/
+```
 
-/Models: Database entities.
+---
 
-/Views: Razor-based responsive UI.
+## 📂 Project Structure
 
-/wwwroot: Static assets (CSS, JS, Images).
+```
+/Controllers
+/Data
+/Models
+/Services
+/Views
+/wwwroot
+```
 
-🛡️ License & Trial Terms
-Trial Period: 3 Days (Managed via %AppData%/sys_config.data).
+---
 
-Commercial License: Contact the developer for full activation.
+## 🛡️ Security Features
 
+- Session Encryption  
+- Role-Based Authorization  
+- Secure Transactions  
+- Protected Connection Strings  
 
-🤝Contact & Support
-Developed with ❤️ by Mohamed Khaled.
+---
 
+## 📊 Reports & Analytics
 
-WhatsApp: [01092320944]
+- Daily Revenue  
+- Monthly Profit  
+- Spare Parts Usage  
+- Technician Performance  
 
-Email: [Hamok550@gmail.com]
-   
+---
+
+## 🧪 Trial & Licensing
+
+### Trial Version
+- 3 Days Trial  
+- Controlled via:
+
+```
+%AppData%/sys_config.data
+```
+
+---
+
+### Commercial License
+Contact Developer for Activation.
+
+---
+
+## 👨‍💻 Developer
+
+**Mohamed Khaled**
+
+📱 WhatsApp: +20 1092320944  
+📧 Email: Hamok550@gmail.com  
+
+---
+
+## ❤️ Support
+
+If you like this project:
+
+⭐ Star the repo  
+🍴 Fork it  
+📢 Share it  
+
+---
+
+## 📜 License
+
+Private Commercial License – Contact Developer.
